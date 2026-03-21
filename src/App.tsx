@@ -6,7 +6,8 @@ import { ChatPanel } from './components/ChatPanel';
 import { HeadOrgans, CATEGORY_META, type OrganCategory } from './components/HeadOrgans';
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
-import { Brush, Eye, Play, StopCircle, Trash2, MapPin, Layers, ChevronDown, ChevronUp } from 'lucide-react';
+import { playAISpeech } from './lib/elevenlabs';
+import { MapPin } from 'lucide-react';
 
 type DrawSession = {
   decalIds: string[];
@@ -94,12 +95,25 @@ function App() {
 
     const prompt = `A patient has drawn over the following anatomical regions on a 3D head model: ${zoneText}.
 
-Provide a single, unified clinical triage assessment covering:
-1. What conditions are commonly associated with these specific anatomical regions
-2. Which region combination is most clinically significant
-3. 2-3 targeted diagnostic questions to narrow down the condition
+Provide a highly structured, single clinical triage assessment using exact HTML tags (<h3>, <strong>, <ul>, <li>, <p>). Do NOT use markdown.
 
-Be concise, empathetic, and clinical. Treat all marked regions as one holistic presentation. Respond in plain text only — no markdown, no asterisks, no bullet symbols.`;
+Format exactly as follows:
+<h3>Clinical Observations</h3>
+<p>[Clinical summary of the affected regions]</p>
+
+<h3>Probable Conditions</h3>
+<ul>
+  <li><strong>[Condition 1]:</strong> [Brief description]</li>
+  <li><strong>[Condition 2]:</strong> [Brief description]</li>
+</ul>
+
+<h3>Targeted Diagnostic Questions</h3>
+<ul>
+  <li>[Question 1]</li>
+  <li>[Question 2]</li>
+</ul>
+
+Be concise, empathetic, and professional. Treat all marked regions as one holistic presentation. Return strictly the requested HTML structure.`;
 
     const apiMessages = [
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -108,6 +122,7 @@ Be concise, empathetic, and clinical. Treat all marked regions as one holistic p
 
     try {
       const response = await chatWithAssistant(apiMessages);
+      playAISpeech(response);
       setMessages((prev) => [
         ...prev,
         { id: (Date.now() + 1).toString(), role: 'assistant', content: response },
@@ -185,110 +200,7 @@ Be concise, empathetic, and clinical. Treat all marked regions as one holistic p
           <p className="subtitle">3D Head &amp; Neck Anatomical System v3.0</p>
         </div>
 
-        {/* ── Control Bar ─────────────────────────────────────────────── */}
-        <div className="control-bar">
-          {/* Mode */}
-          <div className="mode-switch">
-            <button
-              className={`btn mode-btn ${isDrawMode ? 'active' : ''}`}
-              onClick={() => { setIsDrawMode(true); setIsDrawingActive(false); }}
-            >
-              <Brush size={15} /> Paint
-            </button>
-            <button
-              className={`btn mode-btn ${!isDrawMode ? 'active' : ''}`}
-              onClick={() => { setIsDrawMode(false); setIsDrawingActive(false); }}
-            >
-              <Eye size={15} /> View
-            </button>
-          </div>
 
-          {/* Draw controls */}
-          {isDrawMode && (
-            <div className="draw-controls">
-              {!isDrawingActive ? (
-                <button className="btn btn-start" onClick={handleStartDraw} disabled={isDiagnosing}>
-                  <Play size={15} /> Start Draw
-                </button>
-              ) : (
-                <button className="btn btn-end" onClick={handleEndDraw}>
-                  <StopCircle size={15} /> End Draw &amp; Diagnose
-                </button>
-              )}
-              <button className="btn btn-clear" onClick={handleClear} disabled={decals.length === 0}>
-                <Trash2 size={15} /> Clear
-              </button>
-            </div>
-          )}
-
-          {/* Organs toggle */}
-          <div className="organ-toggle-group">
-            <button
-              className={`btn organ-toggle-btn ${showOrgans ? 'active' : ''}`}
-              onClick={() => { setShowOrgans((v) => !v); setOrganPanelOpen(showOrgans ? false : organPanelOpen); }}
-              title="Show / hide internal anatomy"
-            >
-              <Layers size={15} /> Anatomy {showOrgans ? 'ON' : 'OFF'}
-            </button>
-            {showOrgans && (
-              <button
-                className="btn organ-filter-btn"
-                onClick={() => setOrganPanelOpen((v) => !v)}
-                title="Filter organ categories"
-              >
-                {organPanelOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
-            )}
-          </div>
-
-          {/* Status strip */}
-          <div className="status-strip">
-            {isDrawingActive && <span className="status-dot drawing" />}
-            {isDiagnosing && <span className="status-dot diagnosing" />}
-            <span className="status-text">
-              {isDiagnosing
-                ? 'Diagnosing…'
-                : isDrawingActive
-                ? 'Drawing active'
-                : showOrgans
-                ? `${activeCategories.size} layer${activeCategories.size !== 1 ? 's' : ''} visible`
-                : isDrawMode
-                ? 'Press Start Draw'
-                : 'Rotate to inspect'}
-            </span>
-          </div>
-        </div>
-
-        {/* ── Organ category filter panel ─────────────────────────────── */}
-        {showOrgans && organPanelOpen && (
-          <div className="organ-filter-panel">
-            <div className="organ-filter-header">
-              <span>Anatomical Layers</span>
-              <button className="btn-text-toggle" onClick={toggleAll}>
-                {allOn ? 'Hide All' : 'Show All'}
-              </button>
-            </div>
-            <div className="organ-filter-grid">
-              {ALL_CATEGORIES.map((cat) => {
-                const meta = CATEGORY_META[cat];
-                const on = activeCategories.has(cat);
-                return (
-                  <button
-                    key={cat}
-                    className={`organ-filter-chip ${on ? 'on' : 'off'}`}
-                    style={{
-                      '--chip-color': meta.color,
-                    } as React.CSSProperties}
-                    onClick={() => toggleCategory(cat)}
-                  >
-                    <span className="chip-dot" />
-                    {meta.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Zone pill */}
         {hoveredZone && (
@@ -312,11 +224,10 @@ Be concise, empathetic, and clinical. Treat all marked regions as one holistic p
 
         {/* ── 3D Canvas ────────────────────────────────────────────────── */}
         <Canvas camera={{ position: [0, 0, 12], fov: 35 }} gl={{ antialias: true }}>
-          <color attach="background" args={['#050505']} />
-          <ambientLight intensity={0.6} />
-          <spotLight position={[5, 10, 5]} intensity={1.5} penumbra={1} castShadow angle={0.2} />
-          <pointLight position={[-5, -5, 5]} intensity={1.5} color="#00f3ff" />
-          <pointLight position={[0, 0, 8]} intensity={0.8} color="#ffffff" />
+          <ambientLight intensity={1.2} />
+          <spotLight position={[5, 10, 5]} intensity={2.0} penumbra={1} castShadow angle={0.2} />
+          <pointLight position={[-5, -5, 5]} intensity={1.5} color="#ffa092" />
+          <pointLight position={[0, 0, 8]} intensity={1.0} color="#ffffff" />
 
           {/* The LeePerrySmith head with decals, scaled ×2 */}
           <FaceModel
@@ -347,7 +258,7 @@ Be concise, empathetic, and clinical. Treat all marked regions as one holistic p
             maxDistance={25}
             makeDefault
           />
-          <ContactShadows position={[0, -5, 0]} opacity={0.5} scale={15} blur={2.5} far={4} color="#00f3ff" />
+          <ContactShadows position={[0, -5, 0]} opacity={0.3} scale={15} blur={2.5} far={4} color="#ffa092" />
         </Canvas>
       </div>
 
@@ -358,6 +269,22 @@ Be concise, empathetic, and clinical. Treat all marked regions as one holistic p
         hoveredZone={hoveredZone}
         activePoint={activePoint}
         isDiagnosing={isDiagnosing}
+        isDrawMode={isDrawMode}
+        setIsDrawMode={setIsDrawMode}
+        isDrawingActive={isDrawingActive}
+        setIsDrawingActive={setIsDrawingActive}
+        handleStartDraw={handleStartDraw}
+        handleEndDraw={handleEndDraw}
+        handleClear={handleClear}
+        hasDecals={decals.length > 0}
+        showOrgans={showOrgans}
+        setShowOrgans={setShowOrgans}
+        organPanelOpen={organPanelOpen}
+        setOrganPanelOpen={setOrganPanelOpen}
+        activeCategories={activeCategories}
+        toggleCategory={toggleCategory}
+        toggleAll={toggleAll}
+        allCategories={ALL_CATEGORIES}
       />
     </div>
   );
