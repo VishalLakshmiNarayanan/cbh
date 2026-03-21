@@ -26,7 +26,7 @@
  *   - Neck organs (thyroid etc): X within ±0.25, Z within 0.00→0.28
  */
 
-import React, { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Activity, BrainCircuit, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
 import { playAISpeech } from '../lib/elevenlabs';
@@ -10,6 +10,7 @@ interface ChatPanelProps {
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   addDecal: (decal: Omit<DecalData, 'id'>) => void;
   hoveredZone: string | null;
+  hoveredCoords: string | null;
   activePoint: { point: Point3D; normal: Point3D } | null;
   isDiagnosing: boolean;
 
@@ -38,6 +39,7 @@ export function ChatPanel({
   setMessages,
   addDecal,
   hoveredZone,
+  hoveredCoords,
   activePoint,
   isDiagnosing,
 
@@ -81,7 +83,7 @@ export function ChatPanel({
     setInput('');
     setIsLoading(true);
 
-    const systemPrompt = "You are a highly structured clinical AI assistant. Always format your responses using HTML tags (<h3>, <strong>, <ul>, <li>, <p>). Do not use markdown like asterisks. Make your response look like a structured clinical document where appropriate. Be concise and empathetic.";
+    const systemPrompt = "You are MedBot, an interactive diagnostic AI avatar. Your text is immediately read aloud to the user and appears as subtitles. NEVER give long explanations, bullet lists, or HTML. Keep responses extremely short, conversational, and direct, exactly like a spoken script. Ask only ONE targeted question at a time if necessary. Maximum 3 sentences and strictly plain text.";
     const apiMessages = [
       { role: 'system' as const, content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -122,24 +124,25 @@ export function ChatPanel({
 
   const busy = isLoading || isDiagnosing;
   const allOn = activeCategories.size === allCategories.length;
+  const latestAIMessage = [...messages].reverse().find((m) => m.role === 'assistant');
 
   return (
     <div className="chat-panel">
       <div className="chat-header">
         <div className="chat-header-title">
-          <div style={{ background: 'rgba(255, 116, 92, 0.1)', padding: '8px', borderRadius: '10px' }}>
-            <BrainCircuit color="var(--accent-cyan)" size={28} />
+          <div className="medbot-avatar-wrap">
+            <img src="/medbot.png" alt="MedBot" className="medbot-avatar" />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <div className={`pulse-indicator ${busy ? 'pulse-active' : ''}`} />
-              <h2 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, color: '#1a1a1a' }}>Diagnostic AI</h2>
+              <h2 style={{ fontSize: '1.3rem', margin: 0, fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.3px' }}>MedBot AI</h2>
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '2px 0 0 0', fontWeight: 500 }}>
               {isDiagnosing
                 ? 'Analyzing marked regions…'
-                : hoveredZone
-                ? `Hovering: ${hoveredZone}`
+                : (hoveredZone || hoveredCoords)
+                ? `Hovering: ${hoveredZone || 'Unknown Region'} ${hoveredCoords ? hoveredCoords : ''}`
                 : 'Awaiting region selection…'}
             </p>
           </div>
@@ -256,49 +259,23 @@ export function ChatPanel({
         </div>
       </div>
 
-      <div className="chat-messages">
-        {messages.length === 0 && !isDiagnosing && (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>
-            <Activity size={48} style={{ opacity: 0.2, margin: '0 auto 1rem', display: 'block' }} />
-            <p style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
-              Paint the affected region on the 3D model using <strong style={{ color: 'var(--accent-cyan)' }}>Start Draw</strong>, then press <strong style={{ color: 'var(--accent-purple)' }}>End Draw &amp; Diagnose</strong> to receive a single combined diagnosis.
-            </p>
-          </div>
-        )}
-
-        {messages.map((msg) => (
-          <div key={msg.id} className={`message ${msg.role === 'assistant' ? 'ai' : 'user'}`}>
-            <div className="message-label">
-              {msg.role === 'assistant' ? 'AI Diagnostician' : 'Patient (You)'}
-            </div>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: msg.content.replace(/\n/g, '<br/>'),
-              }}
-            />
-          </div>
-        ))}
-
-        {isDiagnosing && (
-          <div className="message ai diagnosing-msg">
-            <div className="message-label">AI Diagnostician</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Loader2 size={16} className="spin-icon" />
-              <span style={{ opacity: 0.8 }}>Analysing all marked regions…</span>
-            </div>
-          </div>
-        )}
-
-        {isLoading && !isDiagnosing && (
-          <div className="message ai">
-            <div className="message-label">AI Diagnostician</div>
-            <div className="typing-dots">
-              <span /><span /><span />
-            </div>
-          </div>
-        )}
-
-        <div ref={endOfMessagesRef} />
+      <div className="medbot-voice-agent">
+        <div className="voice-agent-avatar-wrap">
+          <img src="/medbot.png" alt="MedBot Avatar" />
+          {busy && <div className="voice-agent-pulse" />}
+        </div>
+        
+        <div className="voice-agent-subtitle">
+          {isDiagnosing ? (
+            <p className="thinking-text">MedBot is analyzing anatomical regions...</p>
+          ) : isLoading ? (
+            <p className="thinking-text">MedBot is thinking...</p>
+          ) : latestAIMessage ? (
+            <p dangerouslySetInnerHTML={{ __html: latestAIMessage.content.replace(/\n/g, '<br/>') }} />
+          ) : (
+            <p className="intro-text">Hello! I am MedBot. Paint the affected region on the 3D model, and I will analyze it for you.</p>
+          )}
+        </div>
       </div>
 
       <div className="chat-input-container">

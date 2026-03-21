@@ -22,6 +22,8 @@ function App() {
   const [decals, setDecals] = useState<DecalData[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hoveredZone, setHoveredZone] = useState<string | null>(null);
+  const [hoveredCoords, setHoveredCoords] = useState<string | null>(null);
+  const [lockedCoords, setLockedCoords] = useState<string | null>(null);
   const [activePoint, setActivePoint] = useState<{ point: Point3D; normal: Point3D } | null>(null);
 
   // ── Draw mode state ───────────────────────────────────────────────────
@@ -93,27 +95,15 @@ function App() {
     ]);
     setIsDiagnosing(true);
 
-    const prompt = `A patient has drawn over the following anatomical regions on a 3D head model: ${zoneText}.
+    const prompt = `System Instructions for MedBot:
+A patient has just drawn over the following anatomical regions on a 3D head model: ${zoneText}.
 
-Provide a highly structured, single clinical triage assessment using exact HTML tags (<h3>, <strong>, <ul>, <li>, <p>). Do NOT use markdown.
+You are MedBot, an interactive and friendly AI diagnostic avatar. The text you return will be immediately spoken aloud to the patient and displayed as simple, clean subtitles. 
 
-Format exactly as follows:
-<h3>Clinical Observations</h3>
-<p>[Clinical summary of the affected regions]</p>
+DO NOT generate long clinical reports, lists, or HTML. People do not want to read blocks of text.
+Instead, speak directly to the patient in a warm, concise manner. Briefly share your primary diagnostic thought based on those regions, and then ask ONE targeted follow-up question to narrow down the condition. 
 
-<h3>Probable Conditions</h3>
-<ul>
-  <li><strong>[Condition 1]:</strong> [Brief description]</li>
-  <li><strong>[Condition 2]:</strong> [Brief description]</li>
-</ul>
-
-<h3>Targeted Diagnostic Questions</h3>
-<ul>
-  <li>[Question 1]</li>
-  <li>[Question 2]</li>
-</ul>
-
-Be concise, empathetic, and professional. Treat all marked regions as one holistic presentation. Return strictly the requested HTML structure.`;
+Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
     const apiMessages = [
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -203,10 +193,19 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
 
 
         {/* Zone pill */}
-        {hoveredZone && (
-          <div className="zone-pill">
-            <MapPin size={12} />
-            {hoveredZone}
+        {(hoveredZone || hoveredCoords || lockedCoords) && (
+          <div className="zone-pill" style={{ flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MapPin size={12} color={lockedCoords ? '#ff3624' : 'var(--accent-cyan)'} />
+              <span style={{ fontWeight: 600 }}>{hoveredZone || 'Unknown Region'}</span>
+              {hoveredCoords && !lockedCoords && <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{hoveredCoords}</span>}
+            </div>
+            {lockedCoords && (
+              <div style={{ fontSize: '0.75rem', color: '#ff3624', fontWeight: 700, background: 'rgba(255, 54, 36, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+                LOCKED: {lockedCoords}
+              </div>
+            )}
+            {lockedCoords && <div style={{ fontSize: '0.65rem', opacity: 0.5 }}>(Click again in View mode to unlock)</div>}
           </div>
         )}
 
@@ -237,6 +236,8 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
             onFaceUp={handleFaceUp}
             hoveredZone={hoveredZone}
             setHoveredZone={setHoveredZone}
+            setHoveredCoords={setHoveredCoords}
+            setLockedCoords={setLockedCoords}
             isDrawMode={isDrawMode}
             isDrawingActive={isDrawingActive}
           />
@@ -267,6 +268,7 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
         setMessages={setMessages}
         addDecal={addDecal}
         hoveredZone={hoveredZone}
+        hoveredCoords={hoveredCoords}
         activePoint={activePoint}
         isDiagnosing={isDiagnosing}
         isDrawMode={isDrawMode}
