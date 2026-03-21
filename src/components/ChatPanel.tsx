@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download } from 'lucide-react';
+import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download, Mic } from 'lucide-react';
 import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
 import { playAISpeech } from '../lib/elevenlabs';
@@ -34,6 +34,51 @@ interface ChatPanelProps {
   allCategories: OrganCategory[];
 }
 
+function RunningSubtitle({ text }: { text: string }) {
+  const [displayed, setDisplayed] = useState('');
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (!text) {
+      setVisible(false);
+      return;
+    }
+    
+    setVisible(true);
+    setDisplayed('');
+    
+    const words = text.split(' ');
+    let index = 0;
+    
+    const CHUNK_SIZE = 14; // About 2 lines of text
+    const intervalId = setInterval(() => {
+      index++;
+      // Determine the current 2-line 'page'
+      const chunkStart = Math.floor((index - 1) / CHUNK_SIZE) * CHUNK_SIZE;
+      
+      setDisplayed(words.slice(chunkStart, index).join(' '));
+      if (index >= words.length) {
+        clearInterval(intervalId);
+      }
+    }, 320); // Roughly matches ElevenLabs reading cadence per word
+    
+    // Clear out the caption completely after roughly 12 seconds
+    const totalTime = (words.length * 320) + 12000;
+    const timeoutId = setTimeout(() => {
+      setVisible(false);
+    }, totalTime);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [text]);
+
+  if (!visible || !displayed) return <p className="intro-text">Awaiting diagnostic input... Paint an area and I will analyze it.</p>;
+
+  return <p dangerouslySetInnerHTML={{ __html: displayed.replace(/\n/g, '<br/>') }} />;
+}
+
 export function ChatPanel({
   messages,
   setMessages,
@@ -63,11 +108,87 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const isListeningRef = useRef(false);
+  const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef('');
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isDiagnosing]);
+
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      
+      recognitionRef.current.onresult = (event: any) => {
+        let currentFinal = '';
+        let currentInterim = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            currentFinal += event.results[i][0].transcript;
+          } else {
+            currentInterim += event.results[i][0].transcript;
+          }
+        }
+        
+        if (currentFinal) {
+          transcriptRef.current = (transcriptRef.current + ' ' + currentFinal).trim();
+        }
+        
+        setInput((transcriptRef.current + ' ' + currentInterim).trim());
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        if (event.error === 'not-allowed') {
+          isListeningRef.current = false;
+          setIsListening(false);
+        }
+        console.error('Speech recognition error', event.error);
+      };
+      
+      recognitionRef.current.onend = () => {
+        // Chrome cuts the mic automatically after a few seconds of silence.
+        // If the user hasn't explicitly clicked "off", cleanly auto-restart the engine!
+        if (isListeningRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch (e) {
+            isListeningRef.current = false;
+            setIsListening(false);
+          }
+        } else {
+          setIsListening(false);
+        }
+      };
+    }
+  }, []);
+
+  const toggleListen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isListeningRef.current) {
+      isListeningRef.current = false;
+      setIsListening(false);
+      recognitionRef.current?.stop();
+    } else {
+      try {
+        // Start appending to whatever is currently in the text box
+        transcriptRef.current = input;
+        isListeningRef.current = true;
+        setIsListening(true);
+        recognitionRef.current?.start();
+      } catch (e) {
+        console.error('Microphone access issue', e);
+        isListeningRef.current = false;
+        setIsListening(false);
+      }
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -271,7 +392,7 @@ export function ChatPanel({
           ) : isLoading ? (
             <p className="thinking-text">MedBot is thinking...</p>
           ) : latestAIMessage ? (
-            <p dangerouslySetInnerHTML={{ __html: latestAIMessage.content.replace(/\n/g, '<br/>') }} />
+            <RunningSubtitle text={latestAIMessage.content} />
           ) : (
             <p className="intro-text">Hello! I am MedBot. Paint the affected region on the 3D model, and I will analyze it for you.</p>
           )}
@@ -292,10 +413,33 @@ export function ChatPanel({
             }
             disabled={busy}
           />
+          <button 
+            type="button" 
+            className={`chat-mic ${isListening ? 'listening' : ''}`}
+            onClick={toggleListen}
+            disabled={busy || !recognitionRef.current}
+            title={isListening ? "Click to stop dictation" : "Dictate with Microphone"}
+          >
+            {isListening ? <StopCircle size={18} /> : <Mic size={18} />}
+          </button>
           <button type="submit" className="chat-submit" disabled={busy || !input.trim()}>
             {busy ? <Loader2 size={18} className="spin-icon" /> : <Send size={18} />}
           </button>
         </form>
+      </div>
+
+      {/* ── Print Only Diagnosis Log ── */}
+      <div className="print-only-diagnosis">
+        <h2>MedBot Diagnostic Report</h2>
+        <hr style={{ margin: '1rem 0' }} />
+        {messages.map((m) => (
+          <div key={m.id} style={{ marginBottom: '1rem' }}>
+            <strong style={{ color: m.role === 'assistant' ? 'var(--accent-cyan)' : '#333' }}>
+              {m.role === 'assistant' ? 'MedBot Diagnosis:' : 'Patient Input:'}
+            </strong>
+            <p style={{ marginTop: '0.4rem', lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: m.content.replace(/\n/g, '<br/>') }} />
+          </div>
+        ))}
       </div>
     </div>
   );
