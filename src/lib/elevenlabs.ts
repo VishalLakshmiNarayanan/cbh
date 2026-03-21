@@ -4,36 +4,14 @@ export async function playAISpeech(text: string) {
 
   const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
-  // Fallback function using native Browser Speech Synthesis
-  const playNativeFallback = () => {
-    if (!window.speechSynthesis) {
-      console.warn("Browser does not support Speech Synthesis API.");
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = 'en-US';
-    // Optionally try to find a natural sounding female voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
-    console.log("Using browser's native SpeechSynthesis fallback.");
-  };
-
-  // If no key is set or it contains placeholder, use fallback immediately
   if (!apiKey || apiKey.includes('your_eleven_labs_api_key_here')) {
-    console.warn("No valid ElevenLabs API key found. Using browser native voice fallback.");
-    playNativeFallback();
+    console.error("No valid ElevenLabs API key found! Please update VITE_ELEVENLABS_API_KEY in your .env");
     return;
   }
 
   try {
-    // Rachel: 21m00Tcm4TlvDq8ikWAM - Very clear, professional, soothing voice ideal for health diagnostics
-    const voiceId = '21m00Tcm4TlvDq8ikWAM'; 
+    // Roger - Laid-Back, Casual, Resonant
+    const voiceId = 'CwhRBWXzGAHq8TQ4Fs17'; 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
       headers: {
@@ -52,8 +30,9 @@ export async function playAISpeech(text: string) {
     });
 
     if (!response.ok) {
-      console.error(`ElevenLabs API error: ${response.statusText}. Using fallback...`);
-      playNativeFallback();
+      console.error(`ElevenLabs API error: ${response.statusText}`);
+      const body = await response.text();
+      console.error(body);
       return;
     }
 
@@ -65,13 +44,12 @@ export async function playAISpeech(text: string) {
       console.error("Error playing audio, possibly due to browser auto-play policies:", e);
     });
     
-    // Optional: free up memory after playing
+    // Free up memory after playing
     audio.onended = () => {
       URL.revokeObjectURL(audioUrl);
     };
 
   } catch (err) {
-    console.error("ElevenLabs TTS failed. Using fallback...", err);
-    playNativeFallback();
+    console.error("ElevenLabs TTS failed severely in the network fetch:", err);
   }
 }
