@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import { FaceModel } from './components/FaceModel';
 import { ChatPanel } from './components/ChatPanel';
-import { HeadOrgans, CATEGORY_META, type OrganCategory } from './components/HeadOrgans';
+import { HeadOrgans, CATEGORY_META, type OrganCategory, type OrganSummary } from './components/HeadOrgans';
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
 import { playAISpeech } from './lib/elevenlabs';
@@ -17,6 +17,9 @@ type DrawSession = {
 };
 
 const ALL_CATEGORIES = Object.keys(CATEGORY_META) as OrganCategory[];
+const normalizeDialogText = (text: string) => text.replace(/—/g, '-');
+const ANATOMY_LAYER_SCALE = 1.9;
+const ANATOMY_LAYER_POSITION: [number, number, number] = [0, 0.08, -0.08];
 
 function App() {
   const [decals, setDecals] = useState<DecalData[]>([]);
@@ -35,6 +38,14 @@ function App() {
   const [activeCategories, setActiveCategories] = useState<Set<OrganCategory>>(
     new Set(ALL_CATEGORIES)
   );
+  const [selectedOrgan, setSelectedOrgan] = useState<{
+    id: string;
+    label: string;
+    description: string;
+    category: OrganCategory;
+  } | null>(null);
+  const [hoveredOrgan, setHoveredOrgan] = useState<OrganSummary | null>(null);
+  const [animatedDescription, setAnimatedDescription] = useState('');
 
   // ── Draw session refs ────────────────────────────────────────────────
   const currentSession = useRef<DrawSession | null>(null);
@@ -64,6 +75,7 @@ function App() {
 
   // ─── Draw lifecycle ────────────────────────────────────────────────────
   const handleStartDraw = () => {
+    setSelectedOrgan(null);
     currentSession.current = {
       decalIds: [],
       zones: new Set(),
@@ -135,6 +147,7 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
 
   const handleClear = () => {
     setDecals([]);
+    setSelectedOrgan(null);
     currentSession.current = null;
     setIsDrawingActive(false);
     isStroking.current = false;
@@ -189,6 +202,27 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
 
   const handleFaceUp = useCallback(() => { isStroking.current = false; }, []);
 
+  // ─── Hover auto-typing dialog ───────────────────────────────────────────
+  useEffect(() => {
+    if (!hoveredOrgan) {
+      setAnimatedDescription('');
+      return;
+    }
+    const description = normalizeDialogText(hoveredOrgan.description);
+    let index = 0;
+    setAnimatedDescription('');
+
+    const interval = window.setInterval(() => {
+      index += 1;
+      setAnimatedDescription(description.slice(0, index));
+      if (index >= description.length) {
+        window.clearInterval(interval);
+      }
+    }, 30);
+
+    return () => window.clearInterval(interval);
+  }, [hoveredOrgan]);
+
   // ─── Render ────────────────────────────────────────────────────────────
   return (
     <div className="app-container">
@@ -207,6 +241,18 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
           <div className="zone-pill">
             <MapPin size={12} />
             {hoveredZone}
+          </div>
+        )}
+
+        {/* Selected organ info */}
+        {selectedOrgan && (
+          <div className="selected-organ-card">
+            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: CATEGORY_META[selectedOrgan.category].color }}>
+              Selected: {selectedOrgan.label}
+            </div>
+            <div style={{ fontSize: '1.05rem', color: '#f8f9ff', lineHeight: 1.6, marginTop: '0.35rem' }}>
+              {selectedOrgan.description}
+            </div>
           </div>
         )}
 
@@ -241,11 +287,16 @@ Be concise, empathetic, and professional. Treat all marked regions as one holist
             isDrawingActive={isDrawingActive}
           />
 
-          {/* Internal organs layer — placed inside a scale={2} group to match FaceModel */}
-          <group scale={2}>
+          <group scale={ANATOMY_LAYER_SCALE} position={ANATOMY_LAYER_POSITION}>
             <HeadOrgans
               visible={showOrgans}
               activeCategories={activeCategories}
+              selectedOrganId={selectedOrgan?.id}
+              onSelectOrgan={(organ) => setSelectedOrgan(organ)}
+              onHoverOrgan={(organ) => setHoveredOrgan(organ)}
+              onUnhoverOrgan={() => setHoveredOrgan(null)}
+              hoveredOrganId={hoveredOrgan?.id ?? null}
+              hoveredDescription={animatedDescription}
             />
           </group>
 
