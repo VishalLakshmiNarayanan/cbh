@@ -11,6 +11,8 @@ interface FaceModelProps {
   onFaceUp: () => void;
   hoveredZone: string | null;
   setHoveredZone: (zone: string | null) => void;
+  setHoveredCoords: (c: string | null) => void;
+  setLockedCoords: React.Dispatch<React.SetStateAction<string | null>>;
   isDrawMode: boolean;
   isDrawingActive: boolean;
 }
@@ -204,6 +206,8 @@ export function FaceModel({
   onFaceMove,
   onFaceUp,
   setHoveredZone,
+  setHoveredCoords,
+  setLockedCoords,
   isDrawMode,
   isDrawingActive,
 }: FaceModelProps) {
@@ -261,14 +265,19 @@ export function FaceModel({
     e.face ? e.face.normal.clone().normalize() : null;
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    if (!isDrawMode || !isDrawingActive) return;
     e.stopPropagation();
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     const lp = getLocalPoint(e);
     const ln = getFaceNormal(e);
     if (!ln) return;
-    const zone = getFacialZone(lp.y, lp.x, lp.z);
-    onFaceDown({ x: lp.x, y: lp.y, z: lp.z }, { x: ln.x, y: ln.y, z: ln.z }, zone);
+
+    if (isDrawMode && isDrawingActive) {
+      const zone = getFacialZone(lp.y, lp.x, lp.z);
+      onFaceDown({ x: lp.x, y: lp.y, z: lp.z }, { x: ln.x, y: ln.y, z: ln.z }, zone);
+    } else if (!isDrawMode && typeof setLockedCoords === 'function') {
+      const coordsStr = `[X:${lp.x.toFixed(2)} Y:${lp.y.toFixed(2)} Z:${lp.z.toFixed(2)}]`;
+      setLockedCoords((prev: string | null) => prev === coordsStr ? null : coordsStr);
+    }
   };
 
   const handlePointerUp = () => {
@@ -280,6 +289,9 @@ export function FaceModel({
     const lp = getLocalPoint(e);
     const zone = getFacialZone(lp.y, lp.x, lp.z);
     setHoveredZone(zone);
+    if (!isDrawingActive) {
+      setHoveredCoords(`[X:${lp.x.toFixed(2)} Y:${lp.y.toFixed(2)} Z:${lp.z.toFixed(2)}]`);
+    }
     document.body.style.cursor = isDrawMode ? (isDrawingActive ? 'crosshair' : 'cell') : 'grab';
     if (isDrawMode && isDrawingActive && e.buttons === 1) {
       e.stopPropagation();
@@ -292,6 +304,7 @@ export function FaceModel({
   const handlePointerOut = () => {
     document.body.style.cursor = 'auto';
     setHoveredZone(null);
+    setHoveredCoords(null);
   };
 
   const modelH = faceBounds.maxY - faceBounds.minY;
