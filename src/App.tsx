@@ -288,10 +288,19 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
 
         {/* Zone pill */}
-        {hoveredZone && (
-          <div className="zone-pill">
-            <MapPin size={12} />
-            {hoveredZone}
+        {(hoveredZone || hoveredCoords || lockedCoords) && (
+          <div className="zone-pill" style={{ flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MapPin size={12} color={lockedCoords ? '#ff3624' : 'var(--accent-cyan)'} />
+              <span style={{ fontWeight: 600 }}>{hoveredZone || 'Unknown Region'}</span>
+              {hoveredCoords && !lockedCoords && <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{hoveredCoords}</span>}
+            </div>
+            {lockedCoords && (
+              <div style={{ fontSize: '0.75rem', color: '#ff3624', fontWeight: 700, background: 'rgba(255, 54, 36, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+                LOCKED: {lockedCoords}
+              </div>
+            )}
+            {lockedCoords && <div style={{ fontSize: '0.65rem', opacity: 0.5 }}>(Click again in View mode to unlock)</div>}
           </div>
         )}
 

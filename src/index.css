@@ -330,6 +330,7 @@ body {
 }
 
 .voice-agent-avatar-wrap {
+<<<<<<< HEAD
   width: 140px;
   height: 140px;
   position: relative;
@@ -337,6 +338,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+=======
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  position: relative;
+  background: #fff;
+  border: 4px solid var(--accent-cyan);
+  box-shadow: 0 8px 32px rgba(255, 107, 82, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+>>>>>>> 618c298 (feat:deployment build fixes)
   z-index: 2;
   flex-shrink: 0;
 }
@@ -344,12 +358,20 @@ body {
 .voice-agent-avatar-wrap img {
   width: 100%;
   height: 100%;
+<<<<<<< HEAD
   object-fit: contain;
+=======
+  object-fit: cover;
+>>>>>>> 618c298 (feat:deployment build fixes)
 }
 
 .voice-agent-pulse {
   position: absolute;
+<<<<<<< HEAD
   top: 10%; left: 10%; right: 10%; bottom: 10%;
+=======
+  top: 0; left: 0; right: 0; bottom: 0;
+>>>>>>> 618c298 (feat:deployment build fixes)
   border-radius: 50%;
   border: 4px solid var(--accent-cyan);
   animation: radarPulse 1.5s infinite ease-out;
@@ -367,6 +389,7 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   max-width: 90%;
+<<<<<<< HEAD
   min-height: 5.5rem; /* Locks physical UI space exactly for ~2 rows */
   display: flex;
   align-items: center;
@@ -376,6 +399,13 @@ body {
   border-radius: 16px;
   border: 2px solid var(--accent-cyan);
   box-shadow: 0 4px 20px rgba(255, 107, 82, 0.15), inset 0 0 0 1px rgba(255, 107, 82, 0.1);
+=======
+  background: rgba(255,255,255,0.6);
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  border: 1px solid rgba(255,255,255,0.8);
+>>>>>>> 618c298 (feat:deployment build fixes)
 }
 
 .thinking-text {
@@ -490,6 +520,7 @@ body {
   backdrop-filter: blur(10px);
 }
 
+<<<<<<< HEAD
 .camera-metrics-panel {
   position: absolute;
   top: 1rem;
@@ -508,6 +539,8 @@ body {
 }
 .camera-metrics-panel strong { display: block; margin-bottom: 0.35rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
 
+=======
+>>>>>>> 618c298 (feat:deployment build fixes)
 .typing-dots { display: flex; gap: 4px; }
 .typing-dots span {
   width: 6px; height: 6px; background-color: var(--accent-cyan); border-radius: 50%;
@@ -531,15 +564,19 @@ body {
 @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 .instruction-overlay h3 { color: var(--accent-cyan); margin-bottom: 0.5rem; font-size: 1.4rem; font-weight: 700; }
 
+<<<<<<< HEAD
 .print-only-diagnosis {
   display: none;
 }
 
+=======
+>>>>>>> 618c298 (feat:deployment build fixes)
 @media print {
   /* Hide the UI interactive tools since they aren't useful in a PDF */
   .control-bar, .chat-input-container, .organ-filter-panel, .btn-text-toggle, .instruction-overlay, .zone-pill, .medbot-voice-agent {
     display: none !important;
   }
+<<<<<<< HEAD
   
   /* Save ink by bypassing gradient backgrounds */
   .app-container {
@@ -568,4 +605,6 @@ body {
     font-family: serif;
     page-break-before: always;
   }
+=======
+>>>>>>> 618c298 (feat:deployment build fixes)
 }
