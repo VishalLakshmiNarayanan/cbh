@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import { FaceModel } from './components/FaceModel';
 import { ChatPanel } from './components/ChatPanel';
-import { HeadOrgans, CATEGORY_META, type OrganCategory } from './components/HeadOrgans';
+import { HeadOrgans, CATEGORY_META, type OrganCategory, type OrganSummary } from './components/HeadOrgans';
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
 import { playAISpeech } from './lib/elevenlabs';
@@ -33,63 +33,9 @@ export function CameraMetricsUpdater() {
 }
 
 const ALL_CATEGORIES = Object.keys(CATEGORY_META) as OrganCategory[];
-
-function TestBrownEyeballs({ onClick }: { onClick: (name: string) => void }) {
-  const { scene } = useGLTF('/brown_eyeball_free.glb');
-  
-  // Manually clone the scene tree so we can safely render multiple distinct instances symmetrically
-  const rightEye = useRef(scene.clone(true)).current;
-  const leftEye = useRef(scene.clone(true)).current;
-
-  return (
-    <group onPointerDown={(e) => { e.stopPropagation(); onClick('Eyeballs'); }}>
-      <primitive object={rightEye} position={[-0.70, 1.68, 1.95]} scale={0.2} />
-      <primitive object={leftEye} position={[0.57, 1.65, 1.93]} scale={0.2} />
-    </group>
-  );
-}
-
-function TestBrain({ onClick }: { onClick: (name: string) => void }) {
-  const { scene } = useGLTF('/human-brain.glb');
-  const brain = useRef(scene.clone(true)).current;
-  return (
-    <primitive 
-      object={brain} 
-      position={[-0.10, 2.35, 0.15]} 
-      rotation={[0, Math.PI * 1.5, 0]} 
-      scale={1.55} 
-      onPointerDown={(e: any) => { e.stopPropagation(); onClick('Brain'); }}
-    />
-  );
-}
-
-function TestLarynx({ onClick }: { onClick: (name: string) => void }) {
-  const { scene } = useGLTF('/anatomy_of_the_larynx.glb');
-  const larynx = useRef(scene.clone(true)).current;
-  return (
-    <primitive 
-      object={larynx} 
-      position={[0, -1.75, -0.85]} 
-      rotation={[0, 0, 0]} 
-      scale={0.02} 
-      onPointerDown={(e: any) => { e.stopPropagation(); onClick('Larynx'); }}
-    />
-  );
-}
-
-function TestTongue({ onClick }: { onClick: (name: string) => void }) {
-  const { scene } = useGLTF('/tongue.glb');
-  const tongue = useRef(scene.clone(true)).current;
-  return (
-    <primitive 
-      object={tongue} 
-      position={[-0.09, 0.15, 0.55]} 
-      rotation={[-6.3, 0.4, 0]} 
-      scale={0.015} 
-      onPointerDown={(e: any) => { e.stopPropagation(); onClick('Tongue'); }}
-    />
-  );
-}
+const normalizeDialogText = (text: string) => text.replace(/—/g, '-');
+const ANATOMY_LAYER_SCALE = 1.9;
+const ANATOMY_LAYER_POSITION: [number, number, number] = [0, 0.08, -0.08];
 
 function App() {
   const [decals, setDecals] = useState<DecalData[]>([]);
@@ -113,6 +59,14 @@ function App() {
   const [activeCategories, setActiveCategories] = useState<Set<OrganCategory>>(
     new Set(ALL_CATEGORIES)
   );
+  const [selectedOrgan, setSelectedOrgan] = useState<{
+    id: string;
+    label: string;
+    description: string;
+    category: OrganCategory;
+  } | null>(null);
+  const [hoveredOrgan, setHoveredOrgan] = useState<OrganSummary | null>(null);
+  const [animatedDescription, setAnimatedDescription] = useState('');
 
   // ── Draw session refs ────────────────────────────────────────────────
   const currentSession = useRef<DrawSession | null>(null);
@@ -178,6 +132,7 @@ Keep it to exactly 3 sentences maximum for the subtitle reader.`;
 
   // ─── Draw lifecycle ────────────────────────────────────────────────────
   const handleStartDraw = () => {
+    setSelectedOrgan(null);
     currentSession.current = {
       decalIds: [],
       zones: new Set(),
@@ -237,6 +192,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
   const handleClear = () => {
     setDecals([]);
+    setSelectedOrgan(null);
     currentSession.current = null;
     setIsDrawingActive(false);
     isStroking.current = false;
@@ -291,6 +247,27 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
   const handleFaceUp = useCallback(() => { isStroking.current = false; }, []);
 
+  // ─── Hover auto-typing dialog ───────────────────────────────────────────
+  useEffect(() => {
+    if (!hoveredOrgan) {
+      setAnimatedDescription('');
+      return;
+    }
+    const description = normalizeDialogText(hoveredOrgan.description);
+    let index = 0;
+    setAnimatedDescription('');
+
+    const interval = window.setInterval(() => {
+      index += 1;
+      setAnimatedDescription(description.slice(0, index));
+      if (index >= description.length) {
+        window.clearInterval(interval);
+      }
+    }, 30);
+
+    return () => window.clearInterval(interval);
+  }, [hoveredOrgan]);
+
   // ─── Render ────────────────────────────────────────────────────────────
   return (
     <div className="app-container">
@@ -311,19 +288,22 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
 
         {/* Zone pill */}
-        {(hoveredZone || hoveredCoords || lockedCoords) && (
-          <div className="zone-pill" style={{ flexDirection: 'column', gap: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MapPin size={12} color={lockedCoords ? '#ff3624' : 'var(--accent-cyan)'} />
-              <span style={{ fontWeight: 600 }}>{hoveredZone || 'Unknown Region'}</span>
-              {hoveredCoords && !lockedCoords && <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{hoveredCoords}</span>}
+        {hoveredZone && (
+          <div className="zone-pill">
+            <MapPin size={12} />
+            {hoveredZone}
+          </div>
+        )}
+
+        {/* Selected organ info */}
+        {selectedOrgan && (
+          <div className="selected-organ-card">
+            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: CATEGORY_META[selectedOrgan.category].color }}>
+              Selected: {selectedOrgan.label}
             </div>
-            {lockedCoords && (
-              <div style={{ fontSize: '0.75rem', color: '#ff3624', fontWeight: 700, background: 'rgba(255, 54, 36, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
-                LOCKED: {lockedCoords}
-              </div>
-            )}
-            {lockedCoords && <div style={{ fontSize: '0.65rem', opacity: 0.5 }}>(Click again in View mode to unlock)</div>}
+            <div style={{ fontSize: '1.05rem', color: '#f8f9ff', lineHeight: 1.6, marginTop: '0.35rem' }}>
+              {selectedOrgan.description}
+            </div>
           </div>
         )}
 
@@ -362,20 +342,16 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             showTest3D={showTest3D}
           />
 
-          {showTest3D && (
-            <group scale={2}>
-              <TestBrownEyeballs onClick={handleOrganClick} />
-              <TestBrain onClick={handleOrganClick} />
-              <TestLarynx onClick={handleOrganClick} />
-              <TestTongue onClick={handleOrganClick} />
-            </group>
-          )}
-
-          {/* Internal organs layer — placed inside a scale={2} group to match FaceModel */}
-          <group scale={2}>
+          <group scale={ANATOMY_LAYER_SCALE} position={ANATOMY_LAYER_POSITION}>
             <HeadOrgans
               visible={showOrgans}
               activeCategories={activeCategories}
+              selectedOrganId={selectedOrgan?.id}
+              onSelectOrgan={(organ) => setSelectedOrgan(organ)}
+              onHoverOrgan={(organ) => setHoveredOrgan(organ)}
+              onUnhoverOrgan={() => setHoveredOrgan(null)}
+              hoveredOrganId={hoveredOrgan?.id ?? null}
+              hoveredDescription={animatedDescription}
             />
           </group>
 

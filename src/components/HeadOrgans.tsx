@@ -77,6 +77,13 @@ type OrganDef = {
   description: string;
 };
 
+export type OrganSummary = {
+  id: string;
+  label: string;
+  description: string;
+  category: OrganCategory;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ORGANS — all positions in USER'S LOGICAL SPACE (×1 scale)
 //
@@ -107,9 +114,9 @@ const ORGANS: OrganDef[] = [
     color: '#ff9eb5',
     emissive: '#3d0010',
     opacity: 0.48,
-    position: [0, 1.65, -0.05],
-    scale: [1.00, 0.90, 0.88],
-    radius: 0.44,
+    position: [0, 2.02, -0.08],
+    scale: [0.94, 0.88, 0.84],
+    radius: 0.40,
     shape: 'sphere',
     description: 'Largest brain region — controls cognition, motor & sensory functions',
   },
@@ -120,10 +127,10 @@ const ORGANS: OrganDef[] = [
     color: '#ff6a8a',
     emissive: '#3d0010',
     opacity: 0.42,
-    // Lateral of cerebrum, inside temporal bone; X≈-0.50, Y≈1.38, Z≈0.02
-    position: [-0.50, 1.38, 0.02],
-    scale: [0.52, 0.60, 0.78],
-    radius: 0.28,
+    // Lateral of cerebrum, inside temporal bone
+    position: [-0.46, 1.78, -0.02],
+    scale: [0.48, 0.56, 0.72],
+    radius: 0.24,
     shape: 'sphere',
     description: 'Processes auditory info, language & memory',
   },
@@ -134,9 +141,9 @@ const ORGANS: OrganDef[] = [
     color: '#ff6a8a',
     emissive: '#3d0010',
     opacity: 0.42,
-    position: [0.50, 1.38, 0.02],
-    scale: [0.52, 0.60, 0.78],
-    radius: 0.28,
+    position: [0.46, 1.78, -0.02],
+    scale: [0.48, 0.56, 0.72],
+    radius: 0.24,
     shape: 'sphere',
     description: 'Processes auditory info, language & facial recognition',
   },
@@ -147,10 +154,10 @@ const ORGANS: OrganDef[] = [
     color: '#e8607a',
     emissive: '#3d0010',
     opacity: 0.52,
-    // Posterior inferior — back of skull: Y≈1.10, Z≈-0.62
-    position: [0, 1.10, -0.62],
-    scale: [0.85, 0.55, 0.62],
-    radius: 0.30,
+    // Posterior inferior, tucked into the lower rear skull
+    position: [0, 1.52, -0.54],
+    scale: [0.78, 0.5, 0.56],
+    radius: 0.26,
     shape: 'sphere',
     description: 'Controls balance, coordination & fine motor movement',
   },
@@ -161,9 +168,9 @@ const ORGANS: OrganDef[] = [
     color: '#c93050',
     emissive: '#3d0010',
     opacity: 0.70,
-    // Connects brain to cervical spine — Y≈0.72 center, Z≈-0.30
-    position: [0, 0.72, -0.30],
-    radiusTop: 0.075, radiusBottom: 0.058, height: 0.42, radialSegments: 16,
+    // Connects brain to cervical spine
+    position: [0, 1.08, -0.22],
+    radiusTop: 0.065, radiusBottom: 0.05, height: 0.38, radialSegments: 16,
     shape: 'cylinder',
     description: 'Controls breathing, heart rate & basic autonomic functions',
   },
@@ -174,9 +181,9 @@ const ORGANS: OrganDef[] = [
     color: '#ffb8cc',
     emissive: '#2a0010',
     opacity: 0.70,
-    // Base of brain, just above pituitary; Y≈1.28, Z≈0.08
-    position: [0, 1.28, 0.08],
-    radius: 0.075,
+    // Base of brain, just above pituitary
+    position: [0, 1.62, 0.02],
+    radius: 0.065,
     shape: 'sphere',
     description: 'Regulates body temperature, hunger, thirst & hormones',
   },
@@ -187,8 +194,8 @@ const ORGANS: OrganDef[] = [
     color: '#ffcc88',
     emissive: '#221100',
     opacity: 0.85,
-    // Deep center brain; Y≈1.55, Z≈-0.18
-    position: [0, 1.55, -0.18],
+    // Deep center brain
+    position: [0, 1.84, -0.14],
     radius: 0.040,
     shape: 'sphere',
     description: 'Produces melatonin — regulates sleep-wake cycles',
@@ -196,7 +203,7 @@ const ORGANS: OrganDef[] = [
 
   // ══════════════════════════════════════════════════════════════════════════
   // PITUITARY GLAND
-  //   Sella turcica base of brain; Y≈1.18, Z≈0.10
+  //   Sella turcica base of brain
   // ══════════════════════════════════════════════════════════════════════════
   {
     id: 'pituitary-gland',
@@ -205,7 +212,7 @@ const ORGANS: OrganDef[] = [
     color: '#ffaa44',
     emissive: '#221100',
     opacity: 0.90,
-    position: [0, 1.18, 0.10],
+    position: [0, 1.48, 0.06],
     scale: [1, 0.70, 0.85],
     radius: 0.050,
     shape: 'sphere',
@@ -225,8 +232,8 @@ const ORGANS: OrganDef[] = [
     color: '#dff4ff',
     emissive: '#001533',
     opacity: 0.92,
-    position: [-0.50, 0.90, 0.58],
-    radius: 0.095,
+    position: [-0.56, 1.34, 0.48],
+    radius: 0.11,
     shape: 'sphere',
     description: 'Globe of the eye — contains lens, retina & vitreous humor',
   },
@@ -237,8 +244,8 @@ const ORGANS: OrganDef[] = [
     color: '#dff4ff',
     emissive: '#001533',
     opacity: 0.92,
-    position: [0.50, 0.90, 0.58],
-    radius: 0.095,
+    position: [0.56, 1.34, 0.48],
+    radius: 0.11,
     shape: 'sphere',
     description: 'Globe of the eye — contains lens, retina & vitreous humor',
   },
@@ -249,9 +256,9 @@ const ORGANS: OrganDef[] = [
     color: '#3388cc',
     emissive: '#001a44',
     opacity: 0.95,
-    position: [-0.50, 0.90, 0.68],
+    position: [-0.56, 1.34, 0.59],
     scale: [1, 1, 0.20],
-    radius: 0.050,
+    radius: 0.055,
     shape: 'sphere',
     description: 'Pigmented ring controlling pupil size and light entry',
   },
@@ -262,9 +269,9 @@ const ORGANS: OrganDef[] = [
     color: '#3388cc',
     emissive: '#001a44',
     opacity: 0.95,
-    position: [0.50, 0.90, 0.68],
+    position: [0.56, 1.34, 0.59],
     scale: [1, 1, 0.20],
-    radius: 0.050,
+    radius: 0.055,
     shape: 'sphere',
     description: 'Pigmented ring controlling pupil size and light entry',
   },
@@ -279,8 +286,8 @@ const ORGANS: OrganDef[] = [
     color: '#ffd700',
     emissive: '#332200',
     opacity: 0.82,
-    // Crossing point mid-base of brain; Y≈1.10, Z≈0.18
-    position: [0, 1.10, 0.18],
+    // Crossing point behind the eyes at the base of the brain
+    position: [0, 1.28, 0.08],
     scale: [0.70, 0.25, 0.35],
     radius: 0.060,
     shape: 'sphere',
@@ -662,8 +669,8 @@ const ORGANS: OrganDef[] = [
     emissive: '#330000',
     opacity: 0.70,
     // Up front of brainstem; Y≈0.72 center, Z≈-0.22
-    position: [0, 0.72, -0.22],
-    radiusTop: 0.018, radiusBottom: 0.018, height: 0.38, radialSegments: 8,
+    position: [0, 1.02, -0.18],
+    radiusTop: 0.016, radiusBottom: 0.016, height: 0.3, radialSegments: 8,
     shape: 'cylinder',
     description: 'Supplies blood to brainstem, cerebellum & posterior brain',
   },
@@ -718,9 +725,9 @@ const ORGANS: OrganDef[] = [
     color: '#ffee44',
     emissive: '#332200',
     opacity: 0.65,
-    position: [-0.36, 1.00, 0.12],
+    position: [-0.32, 1.16, 0.08],
     scale: [0.40, 0.40, 0.90],
-    radius: 0.080,
+    radius: 0.065,
     shape: 'sphere',
     description: 'Cranial nerve V — facial sensation & chewing motor control',
   },
@@ -731,21 +738,41 @@ const ORGANS: OrganDef[] = [
     color: '#ffee44',
     emissive: '#332200',
     opacity: 0.65,
-    position: [0.36, 1.00, 0.12],
+    position: [0.32, 1.16, 0.08],
     scale: [0.40, 0.40, 0.90],
-    radius: 0.080,
+    radius: 0.065,
     shape: 'sphere',
     description: 'Cranial nerve V — facial sensation & chewing motor control',
   },
 ];
 
 // ─── Single organ mesh component ──────────────────────────────────────────────
-function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
+function OrganMesh({ organ, visible, selected, onSelect, onHover, onUnhover, hoverDescription }: {
+  organ: OrganDef;
+  visible: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
+  onHover?: (organ: OrganSummary) => void;
+  onUnhover?: () => void;
+  hoverDescription?: string;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
+    const base = new THREE.Vector3(
+      organ.scale?.[0] ?? 1,
+      organ.scale?.[1] ?? 1,
+      organ.scale?.[2] ?? 1
+    );
+
+    if (selected) {
+      const target = base.clone().multiplyScalar(1.15);
+      meshRef.current.scale.lerp(target, delta * 6);
+      return;
+    }
+
     if (hovered) {
       const s = 1.0 + Math.sin(Date.now() * 0.004) * 0.04;
       meshRef.current.scale.set(
@@ -754,12 +781,7 @@ function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
         (organ.scale?.[2] ?? 1) * s
       );
     } else {
-      const target = new THREE.Vector3(
-        organ.scale?.[0] ?? 1,
-        organ.scale?.[1] ?? 1,
-        organ.scale?.[2] ?? 1
-      );
-      meshRef.current.scale.lerp(target, delta * 6);
+      meshRef.current.scale.lerp(base, delta * 6);
     }
   });
 
@@ -788,6 +810,8 @@ function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
     organ.shape === 'cylinder'
       ? (organ.height ?? 0.30) / 2 + 0.08
       : (organ.radius ?? 0.15) + 0.08;
+  const sideOffset = organ.position[0] >= 0 ? 1.15 : -1.15;
+  const categoryMeta = CATEGORY_META[organ.category];
 
   return (
     <mesh
@@ -795,8 +819,18 @@ function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
       position={organ.position}
       scale={organ.scale ?? [1, 1, 1]}
       rotation={rot as [number, number, number]}
-      onPointerEnter={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
-      onPointerLeave={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
+      onPointerEnter={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+        onHover?.({ id: organ.id, label: organ.label, description: organ.description, category: organ.category });
+      }}
+      onPointerLeave={() => {
+        setHovered(false);
+        document.body.style.cursor = 'auto';
+        onUnhover?.();
+      }}
+      onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
       renderOrder={1}
     >
       {organ.shape === 'sphere' && <sphereGeometry args={[organ.radius ?? 0.15, 28, 20]} />}
@@ -808,10 +842,9 @@ function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
       )}
       <primitive object={material} attach="material" />
 
-      {hovered && (
+      {hovered && hoverDescription && (
         <Html
-          position={[0, labelY, 0]}
-          center
+          position={[sideOffset, labelY, 0]}
           distanceFactor={4}
           zIndexRange={[100, 200]}
           style={{ pointerEvents: 'none' }}
@@ -819,23 +852,38 @@ function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
           <div style={{
             background: 'rgba(8,8,20,0.94)',
             border: `1px solid ${organ.color}`,
-            borderRadius: '10px',
-            padding: '6px 12px',
-            minWidth: '155px',
-            maxWidth: '220px',
-            boxShadow: `0 0 14px ${organ.color}55`,
+            borderRadius: '24px',
+            padding: '28px 30px',
+            width: 'max-content',
+            minWidth: '520px',
+            maxWidth: '840px',
+            boxShadow: `0 28px 56px ${organ.color}33`,
             fontFamily: "'Space Grotesk', sans-serif",
             pointerEvents: 'none',
             whiteSpace: 'normal',
+            transform: organ.position[0] >= 0 ? 'translateX(0)' : 'translateX(-100%)',
           }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: organ.color, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '3px' }}>
+            <div style={{ fontSize: '52px', fontWeight: 700, color: organ.color, letterSpacing: '0.3px', marginBottom: '18px' }}>
               {organ.label}
             </div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.4 }}>
-              {organ.description}
+            <div style={{ fontSize: '28px', color: categoryMeta.color, textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '22px' }}>
+              {categoryMeta.label}
             </div>
-            <div style={{ marginTop: '4px', fontSize: '9px', color: CATEGORY_META[organ.category].color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {CATEGORY_META[organ.category].label}
+            <div style={{
+              fontSize: '40px',
+              lineHeight: 1.55,
+              color: 'rgba(255,255,255,0.95)',
+              minHeight: '0',
+              padding: '26px 28px',
+              borderRadius: '20px',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              maxWidth: '780px',
+            }}>
+              {hoverDescription}
+            </div>
+            <div style={{ marginTop: '22px', fontSize: '24px', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.4px' }}>
+              Hover to preview anatomy details
             </div>
           </div>
         </Html>
@@ -848,14 +896,38 @@ function OrganMesh({ organ, visible }: { organ: OrganDef; visible: boolean }) {
 interface HeadOrgansProps {
   visible: boolean;
   activeCategories: Set<OrganCategory>;
+  selectedOrganId?: string | null;
+  onSelectOrgan?: (organ: OrganSummary) => void;
+  onHoverOrgan?: (organ: OrganSummary) => void;
+  onUnhoverOrgan?: () => void;
+  hoveredOrganId?: string | null;
+  hoveredDescription?: string;
 }
 
-export function HeadOrgans({ visible, activeCategories }: HeadOrgansProps) {
+export function HeadOrgans({
+  visible,
+  activeCategories,
+  selectedOrganId,
+  onSelectOrgan,
+  onHoverOrgan,
+  onUnhoverOrgan,
+  hoveredOrganId,
+  hoveredDescription,
+}: HeadOrgansProps) {
   if (!visible) return null;
   return (
     <group>
       {ORGANS.map((organ) => (
-        <OrganMesh key={organ.id} organ={organ} visible={activeCategories.has(organ.category)} />
+        <OrganMesh
+          key={organ.id}
+          organ={organ}
+          visible={activeCategories.has(organ.category)}
+          selected={selectedOrganId === organ.id}
+          onSelect={() => onSelectOrgan?.({ id: organ.id, label: organ.label, description: organ.description, category: organ.category })}
+          onHover={onHoverOrgan}
+          onUnhover={onUnhoverOrgan}
+          hoverDescription={hoveredOrganId === organ.id ? hoveredDescription : undefined}
+        />
       ))}
     </group>
   );
