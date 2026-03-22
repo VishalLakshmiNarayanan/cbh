@@ -752,6 +752,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
               isDrawMode={isDrawMode}
               isDrawingActive={isDrawingActive}
               showTest3D={showTest3D}
+              showMuscles={showMuscles}
             />
 
             {showTest3D && (
@@ -799,6 +800,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
           hasDecals={decals.length > 0}
           showTest3D={showTest3D}
           setShowTest3D={setShowTest3D}
+          showMuscles={showMuscles}
+          setShowMuscles={setShowMuscles}
         />
       </div>
     </div>
