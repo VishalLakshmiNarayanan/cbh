@@ -4,8 +4,6 @@ import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
 import { playAISpeech, initAudio } from '../lib/elevenlabs';
 
-const LIVEAVATAR_EMBED_ID = "fa777b65-339c-423f-9fa0-b9e06bc7c174";
-
 interface ChatPanelProps {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
@@ -29,20 +27,6 @@ interface ChatPanelProps {
   setShowTest3D: (val: boolean) => void;
   showMuscles: boolean;
   setShowMuscles: (val: boolean) => void;
-}
-
-function LiveAvatarBot() {
-  return (
-    <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '3px solid var(--accent-cyan)', background: '#000' }}>
-      <iframe 
-        src={`https://embed.liveavatar.com/v1/${LIVEAVATAR_EMBED_ID}`}
-        allow="microphone; camera; display-capture; autoplay; encrypted-media; fullscreen"
-        style={{ width: '100%', height: '100%', border: 'none', objectFit: 'cover' }} 
-        title="LiveAvatar Interaction"
-      />
-      <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'var(--accent-cyan)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', color: '#fff' }}>AGNOS LIVE</div>
-    </div>
-  );
 }
 
 function RunningSubtitle({ text }: { text: string }) {
@@ -261,6 +245,26 @@ export function ChatPanel({
     transcriptRef.current = ''; // Clear transcript for next voice session
     setIsLoading(true);
 
+    const reportRequestPattern = /\b(generate|create|download|export|make)\b.*\b(report|pdf)\b|\b(report|pdf)\b.*\b(generate|create|download|export|make)\b/i;
+    if (reportRequestPattern.test(input)) {
+      const reportHelpResponse =
+        "To generate your report, click the download icon at the top of the chat panel. That will open the PDF export for this session.";
+
+      setIsLoading(false);
+      setIsAudioLoading(true);
+      await playAISpeech(reportHelpResponse);
+      setIsAudioLoading(false);
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: reportHelpResponse,
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      return;
+    }
+
     const systemPrompt = "You are Agnos, an interactive diagnostic AI avatar. Your text is immediately read aloud to the user and appears as subtitles. NEVER give long explanations, bullet lists, or HTML. Keep responses extremely short, conversational, and direct, exactly like a spoken script. Ask only ONE targeted question at a time if necessary. Maximum 3 sentences and strictly plain text.";
     const apiMessages = [
       { role: 'system' as const, content: systemPrompt },
@@ -307,6 +311,31 @@ export function ChatPanel({
 
   const busy = isLoading || isDiagnosing;
   const latestAIMessage = [...messages].reverse().find((m) => m.role === 'assistant');
+  const userMessages = messages.filter((m) => m.role === 'user');
+  const assistantMessages = messages.filter((m) => m.role === 'assistant');
+  const latestUserMessage = userMessages[userMessages.length - 1];
+  const latestAssistantReport = assistantMessages[assistantMessages.length - 1];
+
+  const reportSummary = [
+    latestUserMessage
+      ? {
+          label: 'Latest patient input',
+          value: latestUserMessage.content,
+        }
+      : null,
+    latestAssistantReport
+      ? {
+          label: 'Latest Agnos assessment',
+          value: latestAssistantReport.content,
+        }
+      : null,
+    userMessages.length || assistantMessages.length
+      ? {
+          label: 'Conversation overview',
+          value: `${userMessages.length} patient message${userMessages.length === 1 ? '' : 's'} and ${assistantMessages.length} Agnos response${assistantMessages.length === 1 ? '' : 's'} recorded in this session.`,
+        }
+      : null,
+  ].filter(Boolean) as { label: string; value: string }[];
 
   return (
     <div className="chat-panel">
@@ -424,8 +453,8 @@ export function ChatPanel({
       </div>
 
       <div className="medbot-voice-agent">
-        <div className="voice-agent-avatar-wrap" style={{ background: 'radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%)', border: 'none', boxShadow: 'none' }}>
-          <LiveAvatarBot />
+        <div className="voice-agent-avatar-wrap">
+          <img src={mascotImg} alt="AGNOS AI" className="medbot-avatar" />
           {(busy || isAudioPlaying) && <div className="voice-agent-pulse" style={{ scale: '1.4' }} />}
         </div>
         
@@ -480,8 +509,38 @@ export function ChatPanel({
 
       {/* ── Print Only Diagnosis Log ── */}
       <div className="print-only-diagnosis">
+        <div className="print-only-report-header report-page-header">
+          <div className="print-report-meta">{new Date().toLocaleString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}</div>
+          <div className="print-report-brand">
+            <h1>AGNOS AI</h1>
+            <p>Diagnostic Report</p>
+          </div>
+        </div>
         <h2>AGNOS AI Diagnostic Report</h2>
         <hr style={{ margin: '1rem 0' }} />
+        <div className="print-summary-section">
+          <h3>Conversation Summary</h3>
+          {reportSummary.length > 0 ? (
+            reportSummary.map((item) => (
+              <div key={item.label} className="print-summary-item">
+                <strong>{item.label}</strong>
+                <p>{item.value}</p>
+              </div>
+            ))
+          ) : (
+            <div className="print-summary-item">
+              <strong>Conversation summary</strong>
+              <p>No conversation has been recorded yet.</p>
+            </div>
+          )}
+        </div>
+        <h3 className="print-transcript-heading">Full Conversation</h3>
         {messages.map((m) => (
           <div key={m.id} style={{ marginBottom: '1rem' }}>
             <strong style={{ color: m.role === 'assistant' ? 'var(--accent-cyan)' : '#333' }}>
