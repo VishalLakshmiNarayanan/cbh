@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import { FaceModel } from './components/FaceModel';
 import { ChatPanel } from './components/ChatPanel';
@@ -15,6 +15,22 @@ type DrawSession = {
   centroid: Point3D;
   centroidNormal: Point3D;
 };
+
+// Live telemetry for the camera viewport (rotations and zoom scalar)
+export function CameraMetricsUpdater() {
+  const { camera } = useThree();
+  useFrame(() => {
+    const el = document.getElementById('camera-metrics-text');
+    if (el) {
+      const rotX = (camera.rotation.x * (180 / Math.PI)).toFixed(1);
+      const rotY = (camera.rotation.y * (180 / Math.PI)).toFixed(1);
+      const rotZ = (camera.rotation.z * (180 / Math.PI)).toFixed(1);
+      const dist = camera.position.length().toFixed(2);
+      el.innerText = `Scale (Dist): ${dist} | Rot: [X:${rotX}° Y:${rotY}° Z:${rotZ}°]`;
+    }
+  });
+  return null;
+}
 
 const ALL_CATEGORIES = Object.keys(CATEGORY_META) as OrganCategory[];
 
@@ -190,6 +206,12 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
           <p className="subtitle">3D Head &amp; Neck Anatomical System v3.0</p>
         </div>
 
+        {/* Camera Metrics UI locked to top-right of 3D frame overlay */}
+        <div className="camera-metrics-panel">
+          <strong style={{ color: 'var(--accent-cyan)' }}>Live Camera Telemetry</strong>
+          <div id="camera-metrics-text">Awaiting render state...</div>
+        </div>
+
 
 
         {/* Zone pill */}
@@ -222,11 +244,12 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         )}
 
         {/* ── 3D Canvas ────────────────────────────────────────────────── */}
-        <Canvas camera={{ position: [0, 0, 12], fov: 35 }} gl={{ antialias: true }}>
+        <Canvas camera={{ position: [0, 0, 12], fov: 35 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
           <ambientLight intensity={1.2} />
           <spotLight position={[5, 10, 5]} intensity={2.0} penumbra={1} castShadow angle={0.2} />
           <pointLight position={[-5, -5, 5]} intensity={1.5} color="#ffa092" />
           <pointLight position={[0, 0, 8]} intensity={1.0} color="#ffffff" />
+          <CameraMetricsUpdater />
 
           {/* The LeePerrySmith head with decals, scaled ×2 */}
           <FaceModel
