@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { useGLTF, Decal } from '@react-three/drei';
+import { useGLTF, Decal, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { DecalData, Point3D } from '../types';
@@ -15,6 +15,7 @@ interface FaceModelProps {
   setLockedCoords: React.Dispatch<React.SetStateAction<string | null>>;
   isDrawMode: boolean;
   isDrawingActive: boolean;
+  showTest3D: boolean;
 }
 
 /**
@@ -210,9 +211,20 @@ export function FaceModel({
   setLockedCoords,
   isDrawMode,
   isDrawingActive,
+  showTest3D,
 }: FaceModelProps) {
   const { scene } = useGLTF('/LeePerrySmith.glb');
   const meshRef = useRef<THREE.Mesh>(null);
+  const texture = useTexture('/Map-COL.jpg');
+
+  const texturedMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: 0.8,
+      metalness: 0.1,
+      side: THREE.FrontSide,
+    });
+  }, [texture]);
 
   const geometry = useMemo(() => {
     let geo: THREE.BufferGeometry | null = null;
@@ -314,7 +326,7 @@ export function FaceModel({
       <mesh
         ref={meshRef}
         geometry={geometry}
-        material={glassMaterial}
+        material={showTest3D ? glassMaterial : texturedMaterial}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerMove={handlePointerMove}
