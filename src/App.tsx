@@ -6,7 +6,7 @@ import { ChatPanel } from './components/ChatPanel';
 
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
-import { playAISpeech } from './lib/elevenlabs';
+import { playAISpeech, initAudio } from './lib/elevenlabs';
 import { MapPin } from 'lucide-react';
 
 type DrawSession = {
@@ -135,9 +135,9 @@ function App() {
     ]);
     setIsDiagnosing(true);
 
-    const prompt = `System Instructions for MedBot:
+    const prompt = `System Instructions for Agnos:
 The patient has specifically clicked on the ${organName} 3D anatomical model for a detailed inspection.
-Acting as MedBot, provide a very concise, warm spoken response about the ${organName}. 
+Acting as Agnos, provide a very concise, warm spoken response about the ${organName}. 
 Mention one common healthy habit or one potential symptom associated with the ${organName}, and ask a short follow-up question.
 Keep it to exactly 3 sentences maximum for the subtitle reader.`;
 
@@ -148,9 +148,10 @@ Keep it to exactly 3 sentences maximum for the subtitle reader.`;
 
     try {
       const response = await chatWithAssistant(apiMessages);
+      await initAudio(); 
+      await playAISpeech(response); // Await for sync
       const assistantMessage: Message = { id: Date.now().toString(), role: 'assistant', content: response };
       setMessages((prev) => [...prev, assistantMessage]);
-      playAISpeech(response);
     } catch (error) {
       console.error('Diagnosis failed:', error);
     } finally {
@@ -189,10 +190,10 @@ Keep it to exactly 3 sentences maximum for the subtitle reader.`;
     ]);
     setIsDiagnosing(true);
 
-    const prompt = `System Instructions for MedBot:
+    const prompt = `System Instructions for Agnos:
 A patient has just drawn over the following anatomical regions on a 3D head model: ${zoneText}.
 
-You are MedBot, an interactive and friendly AI diagnostic avatar. The text you return will be immediately spoken aloud to the patient and displayed as simple, clean subtitles. 
+You are Agnos, an interactive and friendly AI diagnostic avatar. The text you return will be immediately spoken aloud to the patient and displayed as simple, clean subtitles. 
 
 DO NOT generate long clinical reports, lists, or HTML. People do not want to read blocks of text.
 Instead, speak directly to the patient in a warm, concise manner. Briefly share your primary diagnostic thought based on those regions, and then ask ONE targeted follow-up question to narrow down the condition. 
@@ -206,7 +207,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
     try {
       const response = await chatWithAssistant(apiMessages);
-      playAISpeech(response);
+      await initAudio(); 
+      await playAISpeech(response); // Await for sync
       setMessages((prev) => [
         ...prev,
         { id: (Date.now() + 1).toString(), role: 'assistant', content: response },
@@ -280,8 +282,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
         {/* Title */}
         <div className="canvas-overlay-ui">
-          <h1 className="title">Diagnostic AI</h1>
-          <p className="subtitle">3D Head &amp; Neck Anatomical System v3.0</p>
+          <h1 className="title">AGNOS AI</h1>
+          <p className="subtitle">Advanced 3D Diagnosis System v3.0</p>
         </div>
 
         {/* Camera Metrics UI locked to top-right of 3D frame overlay */}
