@@ -16,7 +16,7 @@ The central interface allows users to rotate, inspect, and "paint" symptomatic r
 ![Anatomical Mapping](public/git/draw_area.png)
 
 ### Intelligent AI Diagnostics
-Once a region is marked, the integrated Agnos AI—powered by the Groq LPU™ and specialized medical prompt engineering—analyzes the mapped metadata. It provides concise, professional, and warm feedback via synchronized text and speech.
+Once a region is marked, the integrated Agnos AI—powered by the Claude LPU™ and specialized medical prompt engineering—analyzes the mapped metadata. It provides concise, professional, and warm feedback via synchronized text and speech.
 
 ![Diagnostic Feedback](public/git/bot.png)
 
@@ -60,7 +60,7 @@ To run AGNOS AI locally, ensure you have Node.js installed on your system.
 3.  **Environment Configuration**:
     Create a `.env` file in the root directory and add your API keys:
     ```env
-    VITE_GROQ_API_KEY=your_groq_api_key
+    VITE_CLAUDE_API_KEY=your_claude_api_key
     ```
     *Note: The system is currently configured to use browser-native TTS (Web Speech API) for maximum reliability.*
 
