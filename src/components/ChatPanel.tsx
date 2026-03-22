@@ -101,7 +101,7 @@ export function ChatPanel({
   const [isLoading, setIsLoading] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [mascotImg, setMascotImg] = useState('/medbot.png');
+  const [mascotImg, setMascotImg] = useState('/bot/agnos_chilli.png');
   const [isListening, setIsListening] = useState(false);
   const isListeningRef = useRef(false);
   const recognitionRef = useRef<any>(null);
@@ -176,28 +176,32 @@ export function ChatPanel({
   }, []);
 
   useEffect(() => {
+    // Check if the last AI message was a question
+    const lastAI = [...messages].reverse().find(m => m.role === 'assistant');
+    const isAsking = lastAI?.content.includes('?');
+
     let interval: any;
+
     if (isAudioPlaying) {
-      // Cycle through talking images
-      const images = ['/medbot_talking_1.png', '/medbot_talking_2.png', '/medbot_active.png', '/medbot.png'];
+      // Fast cycle between talk and question visuals during audio
+      const animateImages = ['/bot/agnos_talk.png', '/bot/agnos_question.png'];
       let idx = 0;
       interval = setInterval(() => {
-        setMascotImg(images[idx % images.length]);
+        setMascotImg(animateImages[idx % 2]);
         idx++;
-      }, 250);
+      }, 300);
     } else if (isDiagnosing || isLoading || isAudioLoading) {
-      // Show thinking or neutral-thinking cycle
-      const images = ['/medbot_thinking.png', '/medbot.png'];
-      let idx = 0;
-      interval = setInterval(() => {
-        setMascotImg(images[idx % images.length]);
-        idx++;
-      }, 600);
+      setMascotImg('/bot/agnos_think.png');
+    } else if (isDrawingActive) {
+      setMascotImg('/bot/agnos_chilli.png');
+    } else if (isAsking) {
+      setMascotImg('/bot/agnos_question.png');
     } else {
-      setMascotImg('/medbot.png');
+      setMascotImg('/bot/agnos_chilli.png');
     }
+
     return () => clearInterval(interval);
-  }, [isAudioPlaying, isDiagnosing, isLoading, isAudioLoading]);
+  }, [isAudioPlaying, isDiagnosing, isLoading, isAudioLoading, isDrawingActive, messages]);
 
   const toggleListen = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -265,7 +269,7 @@ export function ChatPanel({
       return;
     }
 
-    const systemPrompt = "You are Agnos, an interactive diagnostic AI avatar. Your text is immediately read aloud to the user and appears as subtitles. NEVER give long explanations, bullet lists, or HTML. Keep responses extremely short, conversational, and direct, exactly like a spoken script. Ask only ONE targeted question at a time if necessary. Maximum 3 sentences and strictly plain text.";
+    const systemPrompt = "You are Agnos, a specialized 3D Medical Diagnostic AI. Your ONLY PURPOSE is to assist users in identifying clinical symptoms by analyzing the anatomical markers they place on your 3D interface. STICK STRICTLY to your clinical persona. If the user asks for recipes, jokes, general stories, or anything outside of medical diagnostics and anatomy, you must politely but firmly decline. State that your processing is strictly limited to health-related analysis. Keep your responses precise, warm, and professional. NEVER use lists or HTML. Use only 1-3 short sentences to ensure clear subtitling.";
     const apiMessages = [
       { role: 'system' as const, content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
