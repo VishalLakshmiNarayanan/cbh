@@ -365,7 +365,7 @@ export function ChatPanel({
             className="btn-text-toggle"
             onClick={() => window.print()}
             title="Export Chat to PDF"
-            style={{ padding: '0.5rem', background: 'rgba(255, 116, 92, 0.1)', borderRadius: '8px' }}
+            style={{ padding: '0.5rem', background: 'rgba(65, 105, 225, 0.1)', borderRadius: '8px' }}
           >
             <Download size={18} />
           </button>

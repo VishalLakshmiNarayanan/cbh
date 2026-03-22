@@ -1,7 +1,7 @@
 /**
- * HeadOrgans.tsx — Internal anatomy for LeePerrySmith.glb
+ * HeadOrgans.tsx - Internal anatomy for LeePerrySmith.glb
  *
- * COORDINATE SYSTEM (user's original table — x1 scale):
+ * COORDINATE SYSTEM (user's original table - x1 scale):
  *   The parent <group scale={2}> in App.tsx handles the ×2 render scaling.
  *   So coordinates here are in the USER's logical space:
  *
@@ -78,7 +78,7 @@ type OrganDef = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ORGANS — all positions in USER'S LOGICAL SPACE (×1 scale)
+// ORGANS - all positions in USER'S LOGICAL SPACE (×1 scale)
 //
 // Parent group in App.tsx has scale={2}, so these values map directly
 // to the user's coordinate table.
@@ -95,7 +95,7 @@ type OrganDef = {
 const ORGANS: OrganDef[] = [
 
   // ══════════════════════════════════════════════════════════════════════════
-  // BRAIN  —  Skull interior
+  // BRAIN  -  Skull interior
   //   Skull interior (forehead surface Z≈0.70, inner wall Z≈0.50):
   //   Brain center: Y≈1.65 (mid between Y 0.88–2.40 inner), Z≈-0.05
   //   Safe radius: 0.44 (fits Y 1.21–2.09, Z -0.49–0.39 ✓)
@@ -111,7 +111,7 @@ const ORGANS: OrganDef[] = [
     scale: [1.00, 0.90, 0.88],
     radius: 0.44,
     shape: 'sphere',
-    description: 'Largest brain region — controls cognition, motor & sensory functions',
+    description: 'Largest brain region - controls cognition, motor & sensory functions',
   },
   {
     id: 'left-temporal-lobe',
@@ -147,7 +147,7 @@ const ORGANS: OrganDef[] = [
     color: '#e8607a',
     emissive: '#3d0010',
     opacity: 0.52,
-    // Posterior inferior — back of skull: Y≈1.10, Z≈-0.62
+    // Posterior inferior - back of skull: Y≈1.10, Z≈-0.62
     position: [0, 1.10, -0.62],
     scale: [0.85, 0.55, 0.62],
     radius: 0.30,
@@ -161,7 +161,7 @@ const ORGANS: OrganDef[] = [
     color: '#c93050',
     emissive: '#3d0010',
     opacity: 0.70,
-    // Connects brain to cervical spine — Y≈0.72 center, Z≈-0.30
+    // Connects brain to cervical spine - Y≈0.72 center, Z≈-0.30
     position: [0, 0.72, -0.30],
     radiusTop: 0.075, radiusBottom: 0.058, height: 0.42, radialSegments: 16,
     shape: 'cylinder',
@@ -191,7 +191,7 @@ const ORGANS: OrganDef[] = [
     position: [0, 1.55, -0.18],
     radius: 0.040,
     shape: 'sphere',
-    description: 'Produces melatonin — regulates sleep-wake cycles',
+    description: 'Produces melatonin - regulates sleep-wake cycles',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -209,11 +209,11 @@ const ORGANS: OrganDef[] = [
     scale: [1, 0.70, 0.85],
     radius: 0.050,
     shape: 'sphere',
-    description: 'Master endocrine gland — regulates hormones body-wide',
+    description: 'Master endocrine gland - regulates hormones body-wide',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // EYES  —  inside orbital sockets
+  // EYES  -  inside orbital sockets
   //   Eye surface: Y 0.6–1.2, Z 0.70–1.00, X≈±0.50
   //   Eyeball center: Z ≈ 0.58 (just behind surface), radius ≈ 0.095
   //   Iris: Z ≈ 0.68 (front of eyeball)
@@ -228,7 +228,7 @@ const ORGANS: OrganDef[] = [
     position: [-0.50, 0.90, 0.58],
     radius: 0.095,
     shape: 'sphere',
-    description: 'Globe of the eye — contains lens, retina & vitreous humor',
+    description: 'Globe of the eye - contains lens, retina & vitreous humor',
   },
   {
     id: 'right-eyeball',
@@ -240,7 +240,7 @@ const ORGANS: OrganDef[] = [
     position: [0.50, 0.90, 0.58],
     radius: 0.095,
     shape: 'sphere',
-    description: 'Globe of the eye — contains lens, retina & vitreous humor',
+    description: 'Globe of the eye - contains lens, retina & vitreous humor',
   },
   {
     id: 'left-iris',
@@ -288,7 +288,7 @@ const ORGANS: OrganDef[] = [
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // SINUSES  —  air cavities inside facial skeleton
+  // SINUSES  -  air cavities inside facial skeleton
   //   Keep Z well BELOW surface to stay inside skull
   //   Frontal: behind brow Y≈1.38, Z≈0.38 (surface forehead Z≈0.70)
   //   Ethmoid: between eyes Y≈1.00, Z≈0.38
@@ -307,7 +307,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.88, 0.35, 0.48],
     radius: 0.18,
     shape: 'sphere',
-    description: 'Air-filled cavity in the frontal bone — common site of sinusitis',
+    description: 'Air-filled cavity in the frontal bone - common site of sinusitis',
   },
   {
     id: 'ethmoid-sinus',
@@ -333,7 +333,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.68, 0.42, 0.50],
     radius: 0.138,
     shape: 'sphere',
-    description: 'Deep sinus in the sphenoid bone — near pituitary gland',
+    description: 'Deep sinus in the sphenoid bone - near pituitary gland',
   },
   {
     id: 'left-maxillary-sinus',
@@ -347,7 +347,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.65, 0.88, 0.55],
     radius: 0.155,
     shape: 'sphere',
-    description: 'Largest paranasal sinus — drains into the nasal cavity',
+    description: 'Largest paranasal sinus - drains into the nasal cavity',
   },
   {
     id: 'right-maxillary-sinus',
@@ -360,7 +360,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.65, 0.88, 0.55],
     radius: 0.155,
     shape: 'sphere',
-    description: 'Largest paranasal sinus — drains into the nasal cavity',
+    description: 'Largest paranasal sinus - drains into the nasal cavity',
   },
   {
     id: 'nasal-cavity',
@@ -378,7 +378,7 @@ const ORGANS: OrganDef[] = [
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // ORAL ANATOMY  —  inside mouth cavity
+  // ORAL ANATOMY  -  inside mouth cavity
   //   Mouth surface: Y -0.6–0.0, Z 0.70–1.10
   //   Interior: Z≈0.42–0.56
   // ══════════════════════════════════════════════════════════════════════════
@@ -389,7 +389,7 @@ const ORGANS: OrganDef[] = [
     color: '#dd3030',
     emissive: '#330000',
     opacity: 0.70,
-    // Mouth interior; Y≈-0.22, Z≈0.45 — well inside
+    // Mouth interior; Y≈-0.22, Z≈0.45 - well inside
     position: [0, -0.22, 0.45],
     scale: [0.65, 0.28, 0.75],
     radius: 0.165,
@@ -411,7 +411,7 @@ const ORGANS: OrganDef[] = [
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // INNER EAR  —  inside temporal bone
+  // INNER EAR  -  inside temporal bone
   //   Temporal bone lateral extent: X ≈ ±0.62 at Y≈1.05
   //   Inner ear: X≈±0.60, Y≈1.05, Z≈-0.02 (just inside temporal bone)
   // ══════════════════════════════════════════════════════════════════════════
@@ -425,7 +425,7 @@ const ORGANS: OrganDef[] = [
     position: [-0.60, 1.05, -0.02],
     radius: 0.068,
     shape: 'sphere',
-    description: 'Contains cochlea & semicircular canals — hearing & balance',
+    description: 'Contains cochlea & semicircular canals - hearing & balance',
   },
   {
     id: 'right-inner-ear',
@@ -437,14 +437,14 @@ const ORGANS: OrganDef[] = [
     position: [0.60, 1.05, -0.02],
     radius: 0.068,
     shape: 'sphere',
-    description: 'Contains cochlea & semicircular canals — hearing & balance',
+    description: 'Contains cochlea & semicircular canals - hearing & balance',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
   // SALIVARY GLANDS
-  //   Parotid: in front of ear — X≈±0.58, Y≈0.18, Z≈0.25
+  //   Parotid: in front of ear - X≈±0.58, Y≈0.18, Z≈0.25
   //   (model width at Y≈0.18 is about X ±0.65 max)
-  //   Submandibular: under jaw — X≈±0.32, Y≈-0.68, Z≈0.22
+  //   Submandibular: under jaw - X≈±0.32, Y≈-0.68, Z≈0.22
   // ══════════════════════════════════════════════════════════════════════════
   {
     id: 'left-parotid',
@@ -458,7 +458,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.40, 0.50, 0.38],
     radius: 0.085,
     shape: 'sphere',
-    description: 'Largest salivary gland — in front of & below the ear',
+    description: 'Largest salivary gland - in front of & below the ear',
   },
   {
     id: 'right-parotid',
@@ -471,7 +471,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.40, 0.50, 0.38],
     radius: 0.085,
     shape: 'sphere',
-    description: 'Largest salivary gland — in front of & below the ear',
+    description: 'Largest salivary gland - in front of & below the ear',
   },
   {
     id: 'submandibular-left',
@@ -485,7 +485,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.52, 0.38, 0.42],
     radius: 0.095,
     shape: 'sphere',
-    description: 'Under the lower jawbone — second largest salivary gland',
+    description: 'Under the lower jawbone - second largest salivary gland',
   },
   {
     id: 'submandibular-right',
@@ -498,13 +498,13 @@ const ORGANS: OrganDef[] = [
     scale: [0.52, 0.38, 0.42],
     radius: 0.095,
     shape: 'sphere',
-    description: 'Under the lower jawbone — second largest salivary gland',
+    description: 'Under the lower jawbone - second largest salivary gland',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
   // MANDIBLE (JAW BONE)
   //   Jaw surface: Y -1.2 to -0.6, Z 0.50–1.00
-  //   Bone is interior; Y≈-0.85, Z≈0.52 — keep X narrow (wide flat bone)
+  //   Bone is interior; Y≈-0.85, Z≈0.52 - keep X narrow (wide flat bone)
   // ══════════════════════════════════════════════════════════════════════════
   {
     id: 'mandible',
@@ -517,7 +517,7 @@ const ORGANS: OrganDef[] = [
     scale: [2.00, 0.22, 0.68],
     radius: 0.18,
     shape: 'sphere',
-    description: 'Lower jaw bone — the only movable bone of the skull',
+    description: 'Lower jaw bone - the only movable bone of the skull',
   },
   {
     id: 'hyoid-bone',
@@ -532,11 +532,11 @@ const ORGANS: OrganDef[] = [
     scale: [0.72, 0.18, 0.32],
     radius: 0.065,
     shape: 'sphere',
-    description: 'U-shaped bone above the larynx — anchors tongue muscles',
+    description: 'U-shaped bone above the larynx - anchors tongue muscles',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // RESPIRATORY TRACT — inside neck (Y: -1.6 to -1.2)
+  // RESPIRATORY TRACT - inside neck (Y: -1.6 to -1.2)
   //   Neck is narrow: X safe ≈ ±0.25, Z front ≈ 0.05→0.28
   //   Larynx:    Y≈-1.18, Z≈0.20
   //   Trachea:   Y≈-1.40 center, Z≈0.15, height≈0.30
@@ -553,7 +553,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.78, 0.55, 0.60],
     radius: 0.110,
     shape: 'sphere',
-    description: 'Voice box — contains vocal cords; controls sound production',
+    description: 'Voice box - contains vocal cords; controls sound production',
   },
   {
     id: 'trachea',
@@ -565,7 +565,7 @@ const ORGANS: OrganDef[] = [
     position: [0, -1.42, 0.15],
     radiusTop: 0.048, radiusBottom: 0.048, height: 0.26, radialSegments: 12,
     shape: 'cylinder',
-    description: 'Windpipe — conducts air between larynx and lungs',
+    description: 'Windpipe - conducts air between larynx and lungs',
   },
   {
     id: 'esophagus',
@@ -577,11 +577,11 @@ const ORGANS: OrganDef[] = [
     position: [0, -1.42, 0.02],
     radiusTop: 0.038, radiusBottom: 0.038, height: 0.26, radialSegments: 10,
     shape: 'cylinder',
-    description: 'Food passage from throat to stomach — behind trachea',
+    description: 'Food passage from throat to stomach - behind trachea',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // THYROID GLAND — butterfly shape in front of neck
+  // THYROID GLAND - butterfly shape in front of neck
   //   Below larynx; Y≈-1.35, Z≈0.20, X narrow ±0.22
   // ══════════════════════════════════════════════════════════════════════════
   {
@@ -595,11 +595,11 @@ const ORGANS: OrganDef[] = [
     scale: [1.15, 0.30, 0.42],
     radius: 0.130,
     shape: 'sphere',
-    description: 'Butterfly-shaped neck gland — regulates metabolism & energy',
+    description: 'Butterfly-shaped neck gland - regulates metabolism & energy',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // VASCULAR  —  carotid arteries & jugular veins (carotid sheath)
+  // VASCULAR  -  carotid arteries & jugular veins (carotid sheath)
   //   Neck interior: X≈±0.15 (carotid), X≈±0.24 (jugular)
   //   Center Y≈-1.15 (mid neck), height≈0.70 (Y from -0.80 to -1.50)
   //   Z≈0.05–0.10 (anterior to spine, posterior to trachea)
@@ -669,14 +669,14 @@ const ORGANS: OrganDef[] = [
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // CERVICAL SPINE  —  C1 to C7 vertebrae + spinal cord
+  // CERVICAL SPINE  -  C1 to C7 vertebrae + spinal cord
   //   Perfectly posterior: Z≈-0.38 (well inside back of neck)
   //   Model back surface: Z≈-0.30 at neck; vertebrae safe at Z≈-0.38
   //   C1 at base of skull: Y≈0.28 (foramen magnum)
   //   Each vertebra steps down 0.24 in Y
   //   C1: Y=0.28, C2: Y=0.04, C3: Y=-0.20, C4: Y=-0.44
   //   C5: Y=-0.68, C6: Y=-0.92, C7: Y=-1.16
-  //   Vertebra radius: 0.12 (fits in X ±0.12 — inside neck)
+  //   Vertebra radius: 0.12 (fits in X ±0.12 - inside neck)
   //   Vertebra height: 0.14
   // ══════════════════════════════════════════════════════════════════════════
   ...Array.from({ length: 7 }, (_, i): OrganDef => ({
@@ -689,7 +689,7 @@ const ORGANS: OrganDef[] = [
     position: [0, 0.28 - i * 0.24, -0.38],
     radiusTop: 0.12, radiusBottom: 0.12, height: 0.14, radialSegments: 8,
     shape: 'cylinder',
-    description: `Cervical vertebra C${i + 1} — part of the protective spinal column`,
+    description: `Cervical vertebra C${i + 1} - part of the protective spinal column`,
   })),
 
   {
@@ -704,11 +704,11 @@ const ORGANS: OrganDef[] = [
     position: [0, -0.44, -0.38],
     radiusTop: 0.028, radiusBottom: 0.028, height: 1.44, radialSegments: 8,
     shape: 'cylinder',
-    description: 'Runs through vertebral canal — carries nerve signals from brain to body',
+    description: 'Runs through vertebral canal - carries nerve signals from brain to body',
   },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // TRIGEMINAL NERVES  —  exiting brain at pons level
+  // TRIGEMINAL NERVES  -  exiting brain at pons level
   //   Y≈1.00, X≈±0.36, Z≈0.12 (inside skull, lateral to brainstem)
   // ══════════════════════════════════════════════════════════════════════════
   {
@@ -722,7 +722,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.40, 0.40, 0.90],
     radius: 0.080,
     shape: 'sphere',
-    description: 'Cranial nerve V — facial sensation & chewing motor control',
+    description: 'Cranial nerve V - facial sensation & chewing motor control',
   },
   {
     id: 'trigeminal-right',
@@ -735,7 +735,7 @@ const ORGANS: OrganDef[] = [
     scale: [0.40, 0.40, 0.90],
     radius: 0.080,
     shape: 'sphere',
-    description: 'Cranial nerve V — facial sensation & chewing motor control',
+    description: 'Cranial nerve V - facial sensation & chewing motor control',
   },
 ];
 
