@@ -38,7 +38,7 @@ AGNOS AI is built with a commitment to responsible AI deployment and patient saf
 ## Technical Architecture
 
 *   **Logic & Rendering**: React with Three.js (via React Three Fiber and Drei) for high-performance 3D visualization and decal mapping.
-*   **Natural Language Processing**: Claude-hosted Llama-3 (or optimized LLMs) for low-latency diagnostic reasoning.
+*   **Natural Language Processing**: Anthropic's Claude 3.5 Sonnet API for high-accuracy, low-latency diagnostic reasoning.
 *   **Human-Computer Interaction**: Web Speech API for seamless browser-native text-to-speech output, ensuring high availability and zero-cost accessibility.
 *   **Data Export**: PDF generation module for session summaries, allowing users to take their mapped data to a healthcare provider.
 
@@ -61,8 +61,9 @@ To run AGNOS AI locally, ensure you have Node.js installed on your system.
     Create a `.env` file in the root directory and add your API keys:
     ```env
     VITE_CLAUDE_API_KEY=your_claude_api_key
+    VITE_ELEVENLABS_API_KEY=your_elevenlabs_api_key
     ```
-    *Note: The system is currently configured to use browser-native TTS (Web Speech API) for maximum reliability.*
+    *Note: The platform is configured to securely utilize the ElevenLabs ultra-low-latency `eleven_turbo_v2_5` TTS model alongside native HTML5 blob audio synchronization.*
 
 4.  **Execute development server**:
     ```bash
