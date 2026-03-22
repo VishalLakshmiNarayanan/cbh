@@ -1,9 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download, Mic } from 'lucide-react';
+import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, Download, Mic } from 'lucide-react';
 import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
 import { playAISpeech } from '../lib/elevenlabs';
-import { CATEGORY_META, type OrganCategory } from './HeadOrgans';
 
 interface ChatPanelProps {
   messages: Message[];
@@ -24,14 +23,6 @@ interface ChatPanelProps {
   handleClear: () => void;
   hasDecals: boolean;
   
-  showOrgans: boolean;
-  setShowOrgans: React.Dispatch<React.SetStateAction<boolean>>;
-  organPanelOpen: boolean;
-  setOrganPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  activeCategories: Set<OrganCategory>;
-  toggleCategory: (c: OrganCategory) => void;
-  toggleAll: () => void;
-  allCategories: OrganCategory[];
   showTest3D: boolean;
   setShowTest3D: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -99,14 +90,6 @@ export function ChatPanel({
   handleClear,
   hasDecals,
   
-  showOrgans,
-  setShowOrgans,
-  organPanelOpen,
-  setOrganPanelOpen,
-  activeCategories,
-  toggleCategory,
-  toggleAll,
-  allCategories,
   showTest3D,
   setShowTest3D,
 }: ChatPanelProps) {
@@ -248,7 +231,6 @@ export function ChatPanel({
   };
 
   const busy = isLoading || isDiagnosing;
-  const allOn = activeCategories.size === allCategories.length;
   const latestAIMessage = [...messages].reverse().find((m) => m.role === 'assistant');
 
   return (
@@ -308,15 +290,6 @@ export function ChatPanel({
                 <Layers size={14} /> Test 3D
               </button>
               {/* Note: showOrgans / anatomy toggle disabled per user request for now */}
-              {showOrgans && (
-                <button
-                  className="organ-filter-btn"
-                  onClick={() => setOrganPanelOpen((v) => !v)}
-                  title="Filter organ categories"
-                >
-                  {organPanelOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-              )}
             </div>
           </div>
 
@@ -346,8 +319,6 @@ export function ChatPanel({
                   ? 'Diagnosing…'
                   : isDrawingActive
                   ? 'Drawing active'
-                  : showOrgans
-                  ? `${activeCategories.size} layer${activeCategories.size !== 1 ? 's' : ''} visible`
                   : isDrawMode
                   ? 'Press Start Draw'
                   : 'Rotate to inspect'}
@@ -355,33 +326,7 @@ export function ChatPanel({
             </div>
           </div>
 
-          {showOrgans && organPanelOpen && (
-            <div className="organ-filter-panel">
-              <div className="organ-filter-header">
-                <span>Anatomical Layers</span>
-                <button className="btn-text-toggle" onClick={toggleAll}>
-                  {allOn ? 'Hide All' : 'Show All'}
-                </button>
-              </div>
-              <div className="organ-filter-grid">
-                {allCategories.map((cat) => {
-                  const meta = CATEGORY_META[cat];
-                  const on = activeCategories.has(cat);
-                  return (
-                    <button
-                      key={cat}
-                      className={`organ-filter-chip ${on ? 'on' : 'off'}`}
-                      style={{ '--chip-color': meta.color } as React.CSSProperties}
-                      onClick={() => toggleCategory(cat)}
-                    >
-                      <span className="chip-dot" />
-                      {meta.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
 

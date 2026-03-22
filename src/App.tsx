@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
 import { FaceModel } from './components/FaceModel';
 import { ChatPanel } from './components/ChatPanel';
-import { HeadOrgans, CATEGORY_META, type OrganCategory } from './components/HeadOrgans';
+
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
 import { playAISpeech } from './lib/elevenlabs';
@@ -32,7 +32,7 @@ export function CameraMetricsUpdater() {
   return null;
 }
 
-const ALL_CATEGORIES = Object.keys(CATEGORY_META) as OrganCategory[];
+
 
 function TestBrownEyeballs({ onClick }: { onClick: (name: string) => void }) {
   const { scene } = useGLTF('/brown_eyeball_free.glb');
@@ -107,13 +107,6 @@ function App() {
   const [isDrawingActive, setIsDrawingActive] = useState(false);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
 
-  // ── Organs layer state ────────────────────────────────────────────────
-  const [showOrgans, setShowOrgans] = useState(false);
-  const [organPanelOpen, setOrganPanelOpen] = useState(false);
-  const [activeCategories, setActiveCategories] = useState<Set<OrganCategory>>(
-    new Set(ALL_CATEGORIES)
-  );
-
   // ── Draw session refs ────────────────────────────────────────────────
   const currentSession = useRef<DrawSession | null>(null);
   const lastDrawTime = useRef<number>(0);
@@ -127,18 +120,7 @@ function App() {
     return id;
   }, []);
 
-  const toggleCategory = (cat: OrganCategory) => {
-    setActiveCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return next;
-    });
-  };
 
-  const allOn = activeCategories.size === ALL_CATEGORIES.length;
-  const toggleAll = () =>
-    setActiveCategories(allOn ? new Set() : new Set(ALL_CATEGORIES));
 
   const handleOrganClick = async (organName: string) => {
     if (isDiagnosing) return;
@@ -328,13 +310,13 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         )}
 
         {/* Instruction overlay */}
-        {decals.length === 0 && !isDrawingActive && !showOrgans && (
+        {decals.length === 0 && !isDrawingActive && (
           <div className="instruction-overlay">
             <h3>Select a Region to Diagnose</h3>
             <p>
               Switch to <strong>Paint</strong> mode → <strong>Start Draw</strong> → drag over the affected area.
               <br />
-              Or enable <strong>Anatomy</strong> to reveal internal structures.
+              Or enable <strong>Test 3D</strong> to reveal internal structures.
             </p>
           </div>
         )}
@@ -371,13 +353,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             </group>
           )}
 
-          {/* Internal organs layer — placed inside a scale={2} group to match FaceModel */}
-          <group scale={2}>
-            <HeadOrgans
-              visible={showOrgans}
-              activeCategories={activeCategories}
-            />
-          </group>
+
 
           <Environment preset="city" />
           <OrbitControls
@@ -408,14 +384,6 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         handleEndDraw={handleEndDraw}
         handleClear={handleClear}
         hasDecals={decals.length > 0}
-        showOrgans={showOrgans}
-        setShowOrgans={setShowOrgans}
-        organPanelOpen={organPanelOpen}
-        setOrganPanelOpen={setOrganPanelOpen}
-        activeCategories={activeCategories}
-        toggleCategory={toggleCategory}
-        toggleAll={toggleAll}
-        allCategories={ALL_CATEGORIES}
         showTest3D={showTest3D}
         setShowTest3D={setShowTest3D}
       />
