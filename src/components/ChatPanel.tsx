@@ -24,7 +24,9 @@ interface ChatPanelProps {
   hasDecals: boolean;
   
   showTest3D: boolean;
-  setShowTest3D: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowTest3D: (val: boolean) => void;
+  showMuscles: boolean;
+  setShowMuscles: (val: boolean) => void;
 }
 
 function RunningSubtitle({ text }: { text: string }) {
@@ -92,10 +94,14 @@ export function ChatPanel({
   
   showTest3D,
   setShowTest3D,
+  showMuscles,
+  setShowMuscles,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [mascotImg, setMascotImg] = useState('/bot/agnos_chilli.png');
   const [isListening, setIsListening] = useState(false);
   const isListeningRef = useRef(false);
   const recognitionRef = useRef<any>(null);
@@ -156,6 +162,46 @@ export function ChatPanel({
       };
     }
   }, []);
+
+  // --- Mascot Animation Logic ---
+  useEffect(() => {
+    const handleStart = () => setIsAudioPlaying(true);
+    const handleEnd = () => setIsAudioPlaying(false);
+    window.addEventListener('agnos-audio-start', handleStart);
+    window.addEventListener('agnos-audio-end', handleEnd);
+    return () => {
+      window.removeEventListener('agnos-audio-start', handleStart);
+      window.removeEventListener('agnos-audio-end', handleEnd);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Check if the last AI message was a question
+    const lastAI = [...messages].reverse().find(m => m.role === 'assistant');
+    const isAsking = lastAI?.content.includes('?');
+
+    let interval: any;
+
+    if (isAudioPlaying) {
+      // Fast cycle between talk and question visuals during audio
+      const animateImages = ['/bot/agnos_talk.png', '/bot/agnos_question.png'];
+      let idx = 0;
+      interval = setInterval(() => {
+        setMascotImg(animateImages[idx % 2]);
+        idx++;
+      }, 300);
+    } else if (isDiagnosing || isLoading || isAudioLoading) {
+      setMascotImg('/bot/agnos_think.png');
+    } else if (isDrawingActive) {
+      setMascotImg('/bot/agnos_chilli.png');
+    } else if (isAsking) {
+      setMascotImg('/bot/agnos_question.png');
+    } else {
+      setMascotImg('/bot/agnos_chilli.png');
+    }
+
+    return () => clearInterval(interval);
+  }, [isAudioPlaying, isDiagnosing, isLoading, isAudioLoading, isDrawingActive, messages]);
 
   const toggleListen = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -223,7 +269,7 @@ export function ChatPanel({
       return;
     }
 
-    const systemPrompt = "You are Agnos, an interactive diagnostic AI avatar. Your text is immediately read aloud to the user and appears as subtitles. NEVER give long explanations, bullet lists, or HTML. Keep responses extremely short, conversational, and direct, exactly like a spoken script. Ask only ONE targeted question at a time if necessary. Maximum 3 sentences and strictly plain text.";
+    const systemPrompt = "You are Agnos, a specialized 3D Medical Diagnostic AI. Your PURPOSE is to help users visualize and understand clinical symptoms via anatomical markers. IF YOU DETECT LIFE-THREATENING SYMPTOMS (e.g., severe chest pain, drooping face, difficulty breathing) you MUST prioritize recommending immediate professional emergency care. Always include a brief disclaimer that you are an AI and not a doctor. Consider physiological diversity (age, gender, skin tone) in your analysis to provide unbiased feedback. STICK STRICTLY to your clinical persona. Keep your responses precise, warm, and professional. NEVER use lists or HTML. Use only 1-3 short sentences to ensure clear subtitling.";
     const apiMessages = [
       { role: 'system' as const, content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -300,7 +346,7 @@ export function ChatPanel({
       <div className="chat-header">
         <div className="chat-header-title">
           <div className="medbot-avatar-wrap">
-            <img src="/medbot.png" alt="AGNOS AI Mascot" className="medbot-avatar" />
+            <img src={mascotImg} alt="AGNOS AI Mascot" className="medbot-avatar" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -323,6 +369,24 @@ export function ChatPanel({
           >
             <Download size={18} />
           </button>
+
+            <button 
+              className={`tool-btn ${showMuscles ? 'active' : ''}`}
+              onClick={() => setShowMuscles(!showMuscles)}
+              title="Toggle Muscle Highlights"
+              style={{ padding: '0.4rem', borderRadius: '8px', background: showMuscles ? 'rgba(85, 255, 0, 0.2)' : 'transparent', border: '1px solid var(--accent-cyan)' }}
+            >
+              <Layers size={18} color={showMuscles ? '#55ff00' : 'var(--accent-cyan)'} />
+            </button>
+
+            <button 
+              className={`tool-btn ${showTest3D ? 'active' : ''}`}
+              onClick={() => setShowTest3D(!showTest3D)}
+              title="Toggle Transparency"
+              style={{ padding: '0.4rem', borderRadius: '8px', background: showTest3D ? 'rgba(0, 255, 255, 0.2)' : 'transparent', border: '1px solid var(--accent-cyan)' }}
+            >
+              <Eye size={18} color="var(--accent-cyan)" />
+            </button>
         </div>
 
         {/* Control Bar integrated into Chat Header */}
@@ -346,7 +410,7 @@ export function ChatPanel({
             <div className="organ-toggle-group">
               <button
                 className={`organ-toggle-btn ${showTest3D ? 'active' : ''}`}
-                onClick={() => setShowTest3D((v) => !v)}
+                onClick={() => setShowTest3D(!showTest3D)}
                 title="Test 3D Mode — Opaque head mesh will turn transparent"
               >
                 <Layers size={14} /> Test 3D
@@ -394,8 +458,8 @@ export function ChatPanel({
 
       <div className="medbot-voice-agent">
         <div className="voice-agent-avatar-wrap">
-          <img src="/medbot.png" alt="Agnos Mascot" />
-          {busy && <div className="voice-agent-pulse" />}
+          <img src={mascotImg} alt="AGNOS AI" className="medbot-avatar" />
+          {(busy || isAudioPlaying) && <div className="voice-agent-pulse" style={{ scale: '1.4' }} />}
         </div>
         
         <div className="voice-agent-subtitle">
@@ -445,6 +509,9 @@ export function ChatPanel({
             {busy ? <Loader2 size={18} className="spin-icon" /> : <Send size={18} />}
           </button>
         </form>
+        <p className="disclaimer-text" style={{ fontSize: '0.65rem', color: '#a5a29f', marginTop: '0.6rem', textAlign: 'center', lineHeight: '1.2' }}>
+          <strong>Legal Disclaimer:</strong> Agnos AI is a screening tool for educational and visualization purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical emergency, please contact local emergency services immediately.
+        </p>
       </div>
 
       {/* ── Print Only Diagnosis Log ── */}

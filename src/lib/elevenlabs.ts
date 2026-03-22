@@ -1,5 +1,8 @@
-let audioContext: AudioContext | null = null;
+let audioContext: AudioContext|null = null;
 let nextStartTime = 0;
+let isPlayingInternal = false;
+
+export const isAudioLive = () => isPlayingInternal;
 
 export async function initAudio() {
   if (!audioContext) {
@@ -12,8 +15,10 @@ export async function initAudio() {
   }
 }
 
-export function playAISpeech(text: string): Promise<void> {
+export function playAISpeech(text: string, onStart?: () => void): Promise<void> {
   return new Promise(async (resolve) => {
+    isPlayingInternal = true;
+    window.dispatchEvent(new CustomEvent('agnos-audio-start'));
     await initAudio();
     if (!audioContext) {
       console.error('[ElevenLabs] AudioContext failed to initialize.');
@@ -125,7 +130,7 @@ export function playAISpeech(text: string): Promise<void> {
         
         // Signal ChatPanel EXACTLY when the audio hits the WebAudio pipeline
         if (isFirstChunk) {
-          resolve();
+          onStart?.();
           isFirstChunk = false;
         }
 
@@ -133,8 +138,17 @@ export function playAISpeech(text: string): Promise<void> {
         nextStartTime += audioBuffer.duration;
       }
 
+      // Final Resolve for the entire voice sequence
+      setTimeout(() => {
+        isPlayingInternal = false;
+        window.dispatchEvent(new CustomEvent('agnos-audio-end'));
+        resolve();
+      }, 500);
+
     } catch (err) {
       console.error("ElevenLabs TTS failed severely in the network fetch:", err);
+      isPlayingInternal = false;
+      window.dispatchEvent(new CustomEvent('agnos-audio-end'));
       resolve();
     }
   });
