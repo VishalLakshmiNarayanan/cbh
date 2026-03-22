@@ -137,8 +137,9 @@ function App() {
   const [lockedCoords, setLockedCoords] = useState<string | null>(null);
   const [activePoint, setActivePoint] = useState<{ point: Point3D; normal: Point3D } | null>(null);
   
-  // ── Show Test 3D toggle ──
+  // ── Visualization toggles ───────────────────────────────────────────
   const [showTest3D, setShowTest3D] = useState(false);
+  const [showMuscles, setShowMuscles] = useState(false);
   const [isIntroAnimating, setIsIntroAnimating] = useState(true);
   const orbitControlsRef = useRef<any>(null);
 
@@ -405,6 +406,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             isDrawMode={isDrawMode}
             isDrawingActive={isDrawingActive}
             showTest3D={showTest3D}
+            showMuscles={showMuscles}
           />
 
           {showTest3D && (
@@ -450,6 +452,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         hasDecals={decals.length > 0}
         showTest3D={showTest3D}
         setShowTest3D={setShowTest3D}
+        showMuscles={showMuscles}
+        setShowMuscles={setShowMuscles}
       />
     </div>
   );
