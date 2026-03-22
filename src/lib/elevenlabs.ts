@@ -1,19 +1,22 @@
 let audioContext: AudioContext | null = null;
 let nextStartTime = 0;
 
-export function initAudio() {
+export async function initAudio() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    console.log('[ElevenLabs] AudioContext created.');
   }
   if (audioContext.state === 'suspended') {
-    audioContext.resume();
+    await audioContext.resume();
+    console.log('[ElevenLabs] AudioContext resumed.');
   }
 }
 
 export function playAISpeech(text: string): Promise<void> {
   return new Promise(async (resolve) => {
-    initAudio();
+    await initAudio();
     if (!audioContext) {
+      console.error('[ElevenLabs] AudioContext failed to initialize.');
       resolve();
       return;
     }
@@ -42,7 +45,7 @@ export function playAISpeech(text: string): Promise<void> {
         },
         body: JSON.stringify({
           text: cleanText,
-          model_id: 'eleven_turbo_v2_5',
+          model_id: 'eleven_turbo_v2', // Stable model
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
@@ -51,14 +54,18 @@ export function playAISpeech(text: string): Promise<void> {
       });
 
       if (!response.ok) {
-        console.error(`ElevenLabs API error: ${response.statusText}`);
-        const body = await response.text();
-        console.error(body);
+        const errorBody = await response.text();
+        console.error(`[ElevenLabs Error] Status: ${response.status} (${response.statusText})`);
+        console.error(`[ElevenLabs Details] ${errorBody}`);
+        
+        if (response.status === 401) alert("Unauthorized: ElevenLabs API Key is invalid.");
+        else if (response.status === 403) alert("Forbidden: Out of credits or restricted voice.");
+        
         resolve();
         return;
       }
 
-      // Reset nextStartTime if it's in the past (e.g. previous sentence finished)
+      // Reset nextStartTime if it's in the past
       if (nextStartTime < audioContext.currentTime) {
         nextStartTime = audioContext.currentTime + 0.05; 
       }
@@ -71,6 +78,11 @@ export function playAISpeech(text: string): Promise<void> {
 
       let leftover: Uint8Array | null = null;
       let isFirstChunk = true;
+
+      // Create a global gain node for volume control if needed
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = 1.0; 
+      gainNode.connect(audioContext.destination);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -89,7 +101,7 @@ export function playAISpeech(text: string): Promise<void> {
           bufferToProcess = value;
         }
 
-        // If length is odd, keep the last byte for the next chunk
+        // Must be even for 16-bit
         if (bufferToProcess.length % 2 !== 0) {
           leftover = bufferToProcess.slice(-1);
           bufferToProcess = bufferToProcess.slice(0, -1);
@@ -97,10 +109,7 @@ export function playAISpeech(text: string): Promise<void> {
 
         if (bufferToProcess.length === 0) continue;
 
-        // Convert Uint8Array to Int16Array (16-bit PCM)
         const int16Array = new Int16Array(bufferToProcess.buffer, bufferToProcess.byteOffset, bufferToProcess.byteLength / 2);
-        
-        // Convert Int16 to Float32 [-1.0, 1.0] for Web Audio API
         const float32Array = new Float32Array(int16Array.length);
         for (let i = 0; i < int16Array.length; i++) {
           float32Array[i] = int16Array[i] / 32768.0;
@@ -111,7 +120,7 @@ export function playAISpeech(text: string): Promise<void> {
 
         const source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(audioContext.destination);
+        source.connect(gainNode);
         source.start(nextStartTime);
         
         // Signal ChatPanel EXACTLY when the audio hits the WebAudio pipeline

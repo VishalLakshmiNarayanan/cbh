@@ -95,6 +95,7 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const isListeningRef = useRef(false);
   const recognitionRef = useRef<any>(null);
@@ -182,7 +183,14 @@ export function ChatPanel({
     if (!input.trim() || isLoading || isDiagnosing) return;
 
     // Synchronously initialize the audio context on interaction locally
-    initAudio();
+    await initAudio();
+
+    // Turn off mic if active
+    if (isListeningRef.current) {
+      isListeningRef.current = false;
+      setIsListening(false);
+      recognitionRef.current?.stop();
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -192,6 +200,7 @@ export function ChatPanel({
 
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
+    transcriptRef.current = ''; // Clear transcript for next voice session
     setIsLoading(true);
 
     const systemPrompt = "You are Agnos, an interactive diagnostic AI avatar. Your text is immediately read aloud to the user and appears as subtitles. NEVER give long explanations, bullet lists, or HTML. Keep responses extremely short, conversational, and direct, exactly like a spoken script. Ask only ONE targeted question at a time if necessary. Maximum 3 sentences and strictly plain text.";
@@ -202,9 +211,12 @@ export function ChatPanel({
     ];
 
     const aiResponse = await chatWithAssistant(apiMessages);
+    setIsLoading(false); // Stop LLM loading
+    setIsAudioLoading(true); // Start waiting for TTS
     
     // Perfect sync: Wait until audio specifically hits speakers BEFORE showing text
     await playAISpeech(aiResponse);
+    setIsAudioLoading(false); // TTS has started
 
     const aiMessage: Message = {
       id: (Date.now() + 1).toString(),
@@ -243,7 +255,7 @@ export function ChatPanel({
       <div className="chat-header">
         <div className="chat-header-title">
           <div className="medbot-avatar-wrap">
-            <img src="/agnos_avatar.png" alt="Agnos AI" className="medbot-avatar" />
+            <img src="/medbot.png" alt="AGNOS AI Mascot" className="medbot-avatar" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -337,15 +349,22 @@ export function ChatPanel({
 
       <div className="medbot-voice-agent">
         <div className="voice-agent-avatar-wrap">
-          <img src="/agnos_avatar.png" alt="Agnos Avatar" />
+          <img src="/medbot.png" alt="Agnos Mascot" />
           {busy && <div className="voice-agent-pulse" />}
         </div>
         
         <div className="voice-agent-subtitle">
-          {isDiagnosing ? (
+          {isAudioLoading ? (
+            <div className="diagnosing-loading">
+              <div className="pulse-indicator pulse-active" style={{ width: '12px', height: '12px' }} />
+              <p className="thinking-text" style={{ fontSize: '1.2rem', color: 'var(--accent-cyan)' }}>Diagnosing...</p>
+            </div>
+          ) : isDiagnosing ? (
             <p className="thinking-text">Agnos is analyzing anatomical regions...</p>
           ) : isLoading ? (
-            <p className="thinking-text">Agnos is thinking...</p>
+            <div className="typing-dots">
+              <span></span><span></span><span></span>
+            </div>
           ) : latestAIMessage ? (
             <RunningSubtitle text={latestAIMessage.content} />
           ) : (

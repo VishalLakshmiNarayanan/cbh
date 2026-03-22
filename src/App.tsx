@@ -6,7 +6,7 @@ import { ChatPanel } from './components/ChatPanel';
 
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
-import { playAISpeech } from './lib/elevenlabs';
+import { playAISpeech, initAudio } from './lib/elevenlabs';
 import { MapPin } from 'lucide-react';
 
 type DrawSession = {
@@ -148,9 +148,10 @@ Keep it to exactly 3 sentences maximum for the subtitle reader.`;
 
     try {
       const response = await chatWithAssistant(apiMessages);
+      await initAudio(); 
+      await playAISpeech(response); // Await for sync
       const assistantMessage: Message = { id: Date.now().toString(), role: 'assistant', content: response };
       setMessages((prev) => [...prev, assistantMessage]);
-      playAISpeech(response);
     } catch (error) {
       console.error('Diagnosis failed:', error);
     } finally {
@@ -206,7 +207,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
     try {
       const response = await chatWithAssistant(apiMessages);
-      playAISpeech(response);
+      await initAudio(); 
+      await playAISpeech(response); // Await for sync
       setMessages((prev) => [
         ...prev,
         { id: (Date.now() + 1).toString(), role: 'assistant', content: response },

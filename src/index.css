@@ -361,6 +361,14 @@ body {
   100% { transform: scale(1.4); opacity: 0; }
 }
 
+.diagnosing-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
 .voice-agent-subtitle {
   font-size: 1.15rem;
   font-weight: 600;
