@@ -1,0 +1,227 @@
+Nasal Bridge
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: - 0.12  deg Y: 1.46 deg  Z: 2.37 deg
+
+Left Medial Canthus 
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: - 0.39  deg Y: 1.67 deg  Z: 1.84 deg
+
+Right Medial Canthus 
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: 0.20  deg Y: 1.64 deg  Z: 1.84 deg
+
+Right Medial Canthus 
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: 0.20  deg Y: 1.64 deg  Z: 1.84 deg
+
+Left Eyelid
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: 0.77  deg Y: 1.76 deg  Z: 1.96 deg
+
+Right Eyelid
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: 0.52  deg Y: 1.77 deg  Z: 1.96 deg
+
+Left Periorbital 
+
+Right Periorbital
+
+Left Lateral Canthus
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: -1.05  deg Y: 1.63 deg  Z: 1.65 deg
+
+Right Lateral Canthus
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: X: 0.87 deg Y: 1.66 deg  Z: 1.61 deg
+
+Left Temporal Region Back of head:
+Lower Occipital
+Scale: 40.00
+Rot: [X: -180.0 deg Y: 6.5 deg Z: 180.0 deg]
+Position: X: 0.57 deg Y: 1.48 deg  Z: -1.77 deg
+
+Right Temporal Region Back of head:
+Lower Occipital
+Scale: 40.00
+Rot: [X: -180.0 deg Y: 6.5 deg Z: 180.0 deg]
+Position: X: -0.50 deg Y: 1.44 deg  Z: -1.82 deg
+
+Left Suboccipital
+Scale: 40.00
+Rot: [X: -180.0 deg Y: 6.5 deg Z: 180.0 deg]
+Position: X: 0.56 deg Y: 0.56 deg  Z: -1.24 deg
+
+Right Suboccipital
+Scale: 40.00
+Rot: [X: -180.0 deg Y: 6.5 deg Z: 180.0 deg]
+Position: X: 0.56 deg Y: 0.56 deg  Z: -1.29 deg
+
+Nose Bridge
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X:-0.11 Y: 1.52 Z: 2.33]
+
+Nasal Tip
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X:-0.10 Y: 1.13  Z: 2:58]
+
+Left Nasal Sidewall / Ala
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X:-0.41 Y: 1.04  Z: 2:30]
+
+Right Nasal Sidewall / Ala
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: 0.26 Y: 1.03  Z: 2:30]
+
+Left Cheek
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: -0.99 Y: 0.75  Z: 1.87]
+
+Right Cheek
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: 0.77 Y: 0.80  Z: 1.84]
+
+Left Zygomatic / Cheekbone
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X:-0.69 Y:0.98 Z:2.03]
+
+Right Zygomatic / Cheekbone
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X:0.52 Y:0.97 Z:1.99]
+
+Left Ear
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X:-1.66 Y:1.19 Z:0.04]
+
+Right Ear
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: 1.55 Y:1.22 Z:0.07]
+
+Back of Head
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: 180.0 Y:-4.2 Z:180.0]
+
+Nunchal / C1-C2 Region
+Scale: 40.00
+Rot: [X:180 deg Y:-4.2 deg Z:180 deg]
+Position: [X: -0.07 Y:0.35 Z:-1.31]
+
+Left Upper Trapezius
+Scale: 40.00
+Rot: [X:180 deg Y:-4.2 deg Z:180 deg]
+Position: [X: 0.25 Y:0.04 Z:-1.32]
+
+Right Upper Trapezius
+Scale: 40.00
+Rot: [X:180 deg Y:-4.2 deg Z:180 deg]
+Position: [X: -0.50 Y:0.08 Z:-1.32]
+
+Philtrum
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: -1.38 Y:1.07 Z:1.23]
+
+Oral Commissure / Lips
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: -0.11 Y:0.47 Z:2.25]
+
+Left Buccal / Lower Cheek
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: -0.98 Y:0.29 Z:1.83]
+
+Right Buccal / Lower Cheek
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: 0.76 Y:0.31 Z:1.85]
+
+Left Masseter / Jaw
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: -0.64 Y:0.16 Z:1.97]
+
+Right Masseter / Jaw
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.1 deg Z:-0.1 deg]
+Position: [X: 0.43 Y:-0.03 Z:2.02]
+
+Left & Right Mandibular Angle Back of neck:
+Cervical Spine (C3–C4)
+Scale: 40.00
+Rot: [X:180 deg Y:-3.2 deg Z:180 deg]
+Position: [X: -0.01 Y:-0.41 Z:-1.44]
+
+Left Sternocleidomastoid
+Scale: 40.00
+Rot: [X:-54.6 deg Y:-81.1 deg Z:-54.2 deg]
+Position: [X: -1.26 Y:-0.35 Z:-0.03]
+
+Right Sternocleidomastoid
+Scale: 40.00
+Rot: [X:-84.8 deg Y:80.7 deg Z:84.7 deg]
+Position: [X: 1.08 Y:-0.03 Z:-0.28]
+
+Mentalis / Chin
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.0 deg Z:-0.1 deg]
+Position: [X: -0.11 Y:-0.23 Z:2.27]
+
+Mental Protuberance (Chin Tip)
+Scale: 40.00
+Rot: [X:-3.9 deg Y:-1.0 deg Z:-0.1 deg]
+Position: [X: -0.06 Y:-0.45 Z:2.14]
+
+Left & Right Chin / Submental (Under jaw)
+Scale: 40.00
+Rot: [X:58.2 deg Y:-0.8 deg Z:1.2 deg]
+Position: [X: -0.05 Y:-0.67 Z:1.68]
+
+Left & Right Parotid / Mandible Back of neck:
+Cervical Spine (C4–C5)
+Scale: 40.00
+Rot: [X:-174.3 deg Y:-3.8 deg Z:-179.6 deg]
+Position: [X: -0.06 Y:-0.68 Z:-1.56]
+
+Anterior Neck / Thyroid
+Scale: 40.00
+Rot: [X:-3.8 deg Y:-1.8 deg Z:-0.1 deg]
+Position: [X: 0.18 Y:-1.39 Z:0.76]
+
+Left Sternocleidomastoid (Lower sections)
+Scale: 40.00
+Rot: [X:-102.8 deg Y:-79.9 deg Z:-103.0 deg]
+Position: [X: -1.19 Y:-0.96 Z:0.08]
+
+Right Sternocleidomastoid (Lower sections)
+Scale: 40.00
+Rot: [X:-60.1 deg Y:81.2 deg Z:59.8 deg]
+Position: [X: -1.07 Y:-0.92 Z:0.02]
+
+Right Cervical / Trapezius Neck Back of neck
+Scale: 40.00
+Rot: [X:180.0 deg Y:-4.4 deg Z:180.0 deg]
+Position: [X: -1.04 Y:-0.43 Z:0.81]
+
+Left Cervical / Trapezius Neck Back of neck
+Scale: 40.00
+Rot: [X:180.0 deg Y:-4.4 deg Z:180.0 deg]
+Position: [X: 0.73 Y:-0.34 Z:-0.99]

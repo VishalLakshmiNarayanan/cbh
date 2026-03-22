@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-color: #ffffff;
+  --bg-color: #b1d9fa;
   --text-primary: #111111; 
   --text-secondary: #6e6b68;
   --accent-cyan: #4169E1;
@@ -37,14 +37,68 @@ body {
   height: 100%;
 }
 
+@keyframes crystal-shimmer {
+  0%, 100% {
+    background-position: 0% 0%, 0% 0%, 0% 0%, 50% 50%;
+    background-size: 10px 10px, 10px 10px, 200% 200%, 200% 200%;
+  }
+  50% {
+    background-position: 1px 1px, -1px -1px, 100% 100%, 50% 50%;
+    background-size: 12px 12px, 12px 12px, 200% 200%, 180% 180%;
+  }
+}
+
 .app-container {
   display: flex;
   width: 100%;
   height: 100%;
   position: relative;
-  background-color: var(--bg-color);
-  background-image: radial-gradient(circle at center, #93c5fd, transparent);
+  background:
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 30% 70%, rgba(176, 196, 222, 0.15) 0%, transparent 50%),
+    linear-gradient(135deg, #2c3e50 0%, #3a506b 25%, #435e79 50%, #516b87 75%, #5f7995 100%);
+  background-blend-mode: soft-light, screen, normal;
   overflow: hidden;
+  filter: brightness(1.05) contrast(1.05);
+}
+
+.app-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.16) 0%, transparent 30%),
+    radial-gradient(circle at 65% 50%, rgba(255, 255, 255, 0.06) 0%, transparent 38%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.app-container.intro-background-revealed::before,
+.app-container:not(.intro-active)::before {
+  opacity: 1;
+}
+
+.app-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.96);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 1.45s ease;
+}
+
+.app-container.intro-background-revealed::after,
+.app-container:not(.intro-active)::after {
+  opacity: 0;
+}
+
+.app-container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .canvas-container {
@@ -52,6 +106,32 @@ body {
   position: relative;
   height: 100%;
   background: transparent;
+  transition: flex 1.25s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.app-container.intro-active .canvas-container {
+  flex: 1 1 100%;
+}
+
+.intro-model-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.34) 24%, rgba(255, 255, 255, 0.1) 52%, transparent 74%);
+  opacity: 1;
+  transition: opacity 1.5s ease;
+}
+
+.app-container.intro-active .canvas-container canvas {
+  opacity: 0;
+  transition: opacity 1.45s ease;
+}
+
+.app-container.intro-active.intro-model-revealed .canvas-container canvas,
+.app-container:not(.intro-active) .canvas-container canvas {
+  opacity: 1;
 }
 
 .canvas-overlay-ui {
@@ -60,25 +140,158 @@ body {
   left: 3rem;
   z-index: 10;
   pointer-events: none;
+  transform-origin: center center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition:
+    top 1.25s cubic-bezier(0.2, 0.9, 0.2, 1),
+    left 1.25s cubic-bezier(0.2, 0.9, 0.2, 1),
+    transform 1.25s cubic-bezier(0.2, 0.9, 0.2, 1),
+    text-align 1.25s ease,
+    opacity 1s ease;
+}
+
+.intro-title-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
 }
 
 .title {
   font-size: 2.5rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, var(--accent-cyan), #2047b7);
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #7ea4ff, #9cb8ff);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 10px rgba(65, 105, 225, 0.2));
+  filter: drop-shadow(0 2px 10px rgba(126, 164, 255, 0.16));
+  transition: letter-spacing 0.55s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+@keyframes intro-title-converge {
+  0% {
+    letter-spacing: 0.82em;
+    transform: scale(0.94);
+    opacity: 0.12;
+    filter: blur(10px) drop-shadow(0 2px 10px rgba(65, 105, 225, 0.08));
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    letter-spacing: 0.16em;
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0) drop-shadow(0 2px 10px rgba(126, 164, 255, 0.16));
+  }
 }
 
 .subtitle {
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: rgba(223, 235, 255, 0.84);
   margin-top: 0.25rem;
   letter-spacing: 0.5px;
+}
+
+.app-container.intro-active .canvas-overlay-ui {
+  top: 50%;
+  left: 73%;
+  transform: translate(-50%, -50%) scale(1.85);
+  text-align: center;
+  align-items: center;
+}
+
+.app-container.intro-active.intro-title-docked .canvas-overlay-ui {
+  top: 2.5rem;
+  left: 3rem;
+  transform: translate(0, 0) scale(1);
+  text-align: left;
+  align-items: flex-start;
+}
+
+
+.app-container.intro-active .title {
+  letter-spacing: 0.16em;
+  animation: intro-title-converge 1.55s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+}
+
+.app-container.intro-active .subtitle {
+  opacity: 0;
+}
+
+.app-container.intro-active.intro-title-docked .title,
+.app-container:not(.intro-active) .title {
+  animation: none;
+  transform: none;
+  opacity: 1;
+  filter: drop-shadow(0 2px 10px rgba(126, 164, 255, 0.16));
+}
+
+.app-container.intro-active.intro-title-docked .subtitle,
+.app-container:not(.intro-active) .subtitle {
+  opacity: 0.84;
+}
+
+.app-container.intro-active.intro-model-revealed .intro-model-veil,
+.app-container:not(.intro-active) .intro-model-veil {
+  opacity: 0;
+}
+
+.app-container.intro-active .zone-pill,
+.app-container.intro-active .instruction-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.chat-panel-shell {
+  width: 490px;
+  height: 100%;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 0.9s ease,
+    transform 1.25s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.app-container.intro-active .chat-panel-shell {
+  opacity: 0;
+  transform: translateX(120%);
+  pointer-events: none;
+}
+
+.app-container.intro-active.intro-layout-assembled .chat-panel-shell {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.camera-metrics-panel {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 0.8s ease,
+    transform 1.05s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.app-container.intro-active .camera-metrics-panel {
+  opacity: 0;
+  transform: translateX(120%);
+  pointer-events: none;
+}
+
+.app-container.intro-active.intro-telemetry-visible .camera-metrics-panel {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: none;
 }
 
 .chat-panel {
