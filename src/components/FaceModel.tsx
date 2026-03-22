@@ -15,7 +15,9 @@ interface FaceModelProps {
   setLockedCoords: React.Dispatch<React.SetStateAction<string | null>>;
   isDrawMode: boolean;
   isDrawingActive: boolean;
+  // ── Visualization toggles ───────────────────────────────────────────
   showTest3D: boolean;
+  showMuscles: boolean;
 }
 
 /**
@@ -65,13 +67,17 @@ let boundsInitialized = false;
 
 function getFacialZone(y: number, x: number, z: number): string {
   const absX = Math.abs(x);
-  const isRight = x > 0;
+  const isRight = x < 0; 
 
-  // Front face: geo Z > 0.59  (user Z > 0.35 → (0.35-0.1)×2.355=0.59)
-  // Back of head: geo Z < -0.47  (user Z < -0.10 → (-0.10-0.1)×2.355=-0.47)
+  // --- 1. PROTRUDING MIDLINE (NOSE) ---
+  if (z > 1.50 && absX < 0.75) {
+    if (y > -0.30) return 'Nose Bridge / Dorsum';
+    if (y > -1.30) return 'Nasal Tip / Ala';
+  }
+
   const isBack = z < -0.47;
 
-  // ── CROWN & SCALP  (geo Y > 2.58, user Y > 1.7) ─────────────────────────
+  // ── CROWN & SCALP (y > 2.58) ──
   if (y > 2.58) {
     if (isBack) {
       if (absX < 0.99) return 'Posterior Vertex / Occiput';
@@ -83,7 +89,7 @@ function getFacialZone(y: number, x: number, z: number): string {
     return isRight ? 'Right Temporal Scalp' : 'Left Temporal Scalp';
   }
 
-  // ── FOREHEAD  (geo Y 1.59–2.58, user Y 1.2–1.7) ─────────────────────────
+  // ── FOREHEAD (y > 1.59) ──
   if (y > 1.59) {
     if (isBack) {
       if (absX < 0.72) return 'Occipital (Upper)';
@@ -96,7 +102,7 @@ function getFacialZone(y: number, x: number, z: number): string {
     return isRight ? 'Right Temporal Fossa' : 'Left Temporal Fossa';
   }
 
-  // ── SUPRAORBITAL / BROW  (geo Y 0.99–1.59, user Y 0.9–1.2) ──────────────
+  // ── SUPRAORBITAL / BROW (y > 0.99) ──
   if (y > 0.99) {
     if (isBack) {
       if (absX < 0.72) return 'Mid Occipital / Inion';
@@ -105,15 +111,10 @@ function getFacialZone(y: number, x: number, z: number): string {
     }
     if (absX < 0.53) return 'Glabella (Between Brows)';
     if (absX < 1.32) return isRight ? 'Right Supraorbital Ridge' : 'Left Supraorbital Ridge';
-    if (absX < 2.04) {
-      return z > 1.41
-        ? (isRight ? 'Right Lateral Orbit' : 'Left Lateral Orbit')
-        : (isRight ? 'Right Temple' : 'Left Temple');
-    }
     return isRight ? 'Right Zygomatic Arch / Temple' : 'Left Zygomatic Arch / Temple';
   }
 
-  // ── EYE REGION  (geo Y 0.40–0.99, user Y 0.6–0.9) ───────────────────────
+  // ── EYE REGION (y > 0.40) ──
   if (y > 0.40) {
     if (isBack) {
       if (absX < 0.72) return 'Lower Occipital';
@@ -122,25 +123,16 @@ function getFacialZone(y: number, x: number, z: number): string {
     }
     if (absX < 0.53) return 'Nasal Bridge / Nasion';
     if (absX < 0.99) return isRight ? 'Right Medial Canthus' : 'Left Medial Canthus';
-    if (absX < 1.71) {
-      return z > 1.41
-        ? (isRight ? 'Right Eyelid / Orbital' : 'Left Eyelid / Orbital')
-        : (isRight ? 'Right Periorbital' : 'Left Periorbital');
-    }
-    if (absX < 2.37) return isRight ? 'Right Lateral Canthus' : 'Left Lateral Canthus';
-    return isRight ? 'Right Temporal Region' : 'Left Temporal Region';
+    if (absX < 1.71) return isRight ? 'Right Eyelid / Orbital' : 'Left Eyelid / Orbital';
+    return isRight ? 'Right Lateral Canthus' : 'Left Lateral Canthus';
   }
 
-  // ── NOSE & CHEEKS  (geo Y -0.79–0.40, user Y 0.0–0.6) ───────────────────
+  // ── NOSE & CHEEKS (y > -0.79) ──
   if (y > -0.79) {
     if (isBack) {
       if (absX < 0.72) return 'Nuchal / C1–C2 Region';
       if (absX < 1.81) return isRight ? 'Right Posterior Neck' : 'Left Posterior Neck';
       return isRight ? 'Right Trapezius (Upper)' : 'Left Trapezius (Upper)';
-    }
-    // Nose tip: geo Z > 1.77 (user Z > 0.85), absX < 0.66
-    if (z > 1.77 && absX < 0.66) {
-      return y > 0.0 ? 'Nose Bridge / Dorsum' : 'Nasal Tip';
     }
     if (absX < 0.72) return isRight ? 'Right Nasal Sidewall / Ala' : 'Left Nasal Sidewall / Ala';
     if (absX < 1.65) return isRight ? 'Right Cheek / Maxillary' : 'Left Cheek / Maxillary';
@@ -148,51 +140,82 @@ function getFacialZone(y: number, x: number, z: number): string {
     return isRight ? 'Right Ear / Auricular' : 'Left Ear / Auricular';
   }
 
-  // ── LIPS / MOUTH  (geo Y -1.98–(-0.79), user Y -0.6–0.0) ─────────────────
-  if (y > -1.98) {
-    if (isBack) {
-      if (absX < 0.72) return 'Cervical Spine (C3–C4)';
-      if (absX < 1.81) return isRight ? 'Right Sternocleidomastoid' : 'Left Sternocleidomastoid';
-      return isRight ? 'Right Posterior Neck' : 'Left Posterior Neck';
+  // ── LOWER FACE & NECK TRANSITION (y <= -0.79) ──
+  if (y <= -0.79) {
+    // Determine depth context
+    const isBackLocal = z < -0.47;
+    const isCenter = absX < 0.70;
+
+    // --- Midline / Central Neck structures ---
+    if (isCenter) {
+      // 1. Chin Tip / Mandible Base (Z > 0.4 ensures it's front)
+      if (y > -1.55 && z > 0.35) return 'Chin / Mentalis';
+      
+      // 2. Thyroid / Neck Midline
+      if (y > -2.10 && z > 0.35) {
+        return y > -1.75 ? 'Thyroid Cartilage' : 'Thyroid Gland (Anterior)';
+      }
+      if (y > -3.30 && z > 0.35) return 'Anterior Neck / Platysma';
+      if (z > 0.35) return 'Sternal Notch / Breastbone';
     }
-    if (absX < 0.59) {
-      return y > -1.26 ? 'Philtrum (Upper Lip)' : 'Oral Commissure / Lips';
+      
+      if (isBackLocal) {
+        if (y > -1.98) return 'Cervical Spine (C3–C4)';
+        if (y > -3.17) return 'Cervical Spine (C4–C5)';
+        return 'Posterior Neck / Nuchal';
+      }
+    
+
+    // --- Lateral Jaw vs Neck transition ---
+    if (y > -1.25) {
+      if (absX < 1.32 && !isBackLocal) return isRight ? 'Right Mandible / Chin Base' : 'Left Mandible / Chin Base';
+      if (absX < 2.14 && !isBackLocal) return isRight ? 'Right Jaw / Masseter' : 'Left Jaw / Masseter';
+      if (absX >= 2.14 && !isBackLocal) return isRight ? 'Right Mandibular Angle' : 'Left Mandibular Angle';
     }
-    if (absX < 1.32) return isRight ? 'Right Buccal / Cheek' : 'Left Buccal / Cheek';
-    if (absX < 2.14) return isRight ? 'Right Masseter / Jaw' : 'Left Masseter / Jaw';
-    return isRight ? 'Right Mandibular Angle' : 'Left Mandibular Angle';
+
+    // Deep neck / Muscle regions
+    if (y > -3.30) {
+      if (isBackLocal) {
+        if (absX < 1.91) return isRight ? 'Right SCM / Posterior' : 'Left SCM / Posterior';
+        return isRight ? 'Right Upper Trapezius' : 'Left Upper Trapezius';
+      }
+      
+      // Frontal/Lateral muscle bundles
+      if (absX < 1.85) return isRight ? 'Right Sternocleidomastoid' : 'Left Sternocleidomastoid';
+      if (absX < 2.35) return isRight ? 'Right Scalenus / SCM' : 'Left Scalenus / SCM';
+      return isRight ? 'Right Trapezius (Lateral)' : 'Left Trapezius (Lateral)';
+    }
+
+    // --- Base of Neck / Shoulder border ---
+    if (isBackLocal) {
+      if (absX < 1.91) return isRight ? 'Right Trapezius' : 'Left Trapezius';
+      return isRight ? 'Right Shoulder / Trapezius' : 'Left Shoulder / Trapezius';
+    }
+    
+    if (absX > 2.0) return isRight ? 'Right Scalenus / Shoulder' : 'Left Scalenus / Shoulder';
+    if (absX < 1.85) return isRight ? 'Right SCM / Lower' : 'Left SCM / Lower';
+    return isRight ? 'Right Trapezius' : 'Left Trapezius';
   }
 
-  // ── JAW / CHIN  (geo Y -3.17–(-1.98), user Y -1.2–(-0.6)) ───────────────
-  if (y > -3.17) {
-    if (isBack) {
-      if (absX < 0.72) return 'Cervical Spine (C4–C5)';
-      if (absX < 1.81) return isRight ? 'Right SCM / Neck' : 'Left SCM / Neck';
-      return isRight ? 'Right Posterior Neck' : 'Left Posterior Neck';
-    }
-    if (absX < 0.82) {
-      return y > -2.58 ? 'Mentalis / Chin' : 'Mental Protuberance (Chin Tip)';
-    }
-    if (absX < 1.65) return isRight ? 'Right Chin / Submental' : 'Left Chin / Submental';
-    return isRight ? 'Right Parotid / Mandible' : 'Left Parotid / Mandible';
-  }
-
-  // ── NECK  (geo Y -3.97–(-3.17), user Y -1.6–(-1.2)) ─────────────────────
-  if (y > -3.97) {
-    if (isBack) {
-      if (absX < 0.82) return 'Posterior Neck / Nuchal';
-      if (absX < 1.91) return isRight ? 'Right Posterior Neck / Trapezius' : 'Left Posterior Neck / Trapezius';
-      return isRight ? 'Right Upper Trapezius' : 'Left Upper Trapezius';
-    }
-    if (absX < 0.72) return 'Anterior Neck / Thyroid';
-    if (absX < 1.81) return isRight ? 'Right Sternocleidomastoid' : 'Left Sternocleidomastoid';
-    return isRight ? 'Right Cervical / Trapezius Neck' : 'Left Cervical / Trapezius Neck';
-  }
-
-  // ── BASE ─────────────────────────────────────────────────────────────────
+  // ── BASE / FALLBACK ──────────────────────────────────────────────────────
   if (absX < 0.30) return 'Clavicular / Sternal Notch';
   return isRight ? 'Right Shoulder / Trapezius' : 'Left Shoulder / Trapezius';
 }
+
+const MUSCLE_REGIONS = [
+  { name: 'Frontalis', pos: [0, 2.2, 1.2], rot: [0,0,0], size: 2.5, color: '#ff5500' },
+  { name: 'Orbicularis Oculi R', pos: [-1.2, 0.8, 1.6], rot: [0,0.5,0], size: 1.2, color: '#ff0055' },
+  { name: 'Orbicularis Oculi L', pos: [1.2, 0.8, 1.6], rot: [0,-0.5,0], size: 1.2, color: '#ff0055' },
+  { name: 'Zygomaticus R', pos: [-1.8, -0.2, 1.4], rot: [0,0.8,0], size: 1.0, color: '#ffaa00' },
+  { name: 'Zygomaticus L', pos: [1.8, -0.2, 1.4], rot: [0,-0.8,0], size: 1.0, color: '#ffaa00' },
+  { name: 'Masseter R', pos: [-2.2, -1.8, 0.8], rot: [0,1.2,0], size: 1.5, color: '#aa55ff' },
+  { name: 'Masseter L', pos: [2.2, -1.8, 0.8], rot: [0,-1.2,0], size: 1.5, color: '#aa55ff' },
+  { name: 'Platysma', pos: [0, -3.2, 1.2], rot: [0,0,0], size: 3.5, color: '#00aaff' },
+  { name: 'SCM R', pos: [-1.5, -2.8, 0.2], rot: [0,1.5,0], size: 2.0, color: '#55ff00' },
+  { name: 'SCM L', pos: [1.5, -2.8, 0.2], rot: [0,-1.5,0], size: 2.0, color: '#55ff00' },
+  { name: 'Trapezius R', pos: [-3.5, -2.5, -0.5], rot: [0,2.0,0], size: 3.0, color: '#ffcc00' },
+  { name: 'Trapezius L', pos: [3.5, -2.5, -0.5], rot: [0,-2.0,0], size: 3.0, color: '#ffcc00' },
+];
 
 function getDecalRotation(normal: Point3D): [number, number, number] {
   const n = new THREE.Vector3(normal.x, normal.y, normal.z).normalize();
@@ -212,6 +235,7 @@ export function FaceModel({
   isDrawMode,
   isDrawingActive,
   showTest3D,
+  showMuscles,
 }: FaceModelProps) {
   const { scene } = useGLTF('/LeePerrySmith.glb');
   const meshRef = useRef<THREE.Mesh>(null);
@@ -223,6 +247,17 @@ export function FaceModel({
       roughness: 0.8,
       metalness: 0.1,
       side: THREE.FrontSide,
+    });
+  }, [texture]);
+
+  const transparentTexturedMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: 0.8,
+      metalness: 0.1,
+      side: THREE.FrontSide,
+      transparent: true,
+      opacity: 0.3, // Reduced opacity for muscle visualization
     });
   }, [texture]);
 
@@ -321,12 +356,22 @@ export function FaceModel({
 
   const modelH = faceBounds.maxY - faceBounds.minY;
 
+  const currentMaterial = useMemo(() => {
+    if (showTest3D) {
+      return glassMaterial;
+    }
+    if (showMuscles) {
+      return transparentTexturedMaterial;
+    }
+    return texturedMaterial;
+  }, [showTest3D, showMuscles, glassMaterial, transparentTexturedMaterial, texturedMaterial]);
+
   return (
     <group dispose={null} scale={2}>
       <mesh
         ref={meshRef}
         geometry={geometry}
-        material={showTest3D ? glassMaterial : texturedMaterial}
+        material={currentMaterial}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerMove={handlePointerMove}
@@ -353,6 +398,21 @@ export function FaceModel({
             </Decal>
           );
         })}
+
+        {/* ── Muscle Visualization Overlay ──────────────────────────────── */}
+        {showMuscles && MUSCLE_REGIONS.map((m, i) => (
+          <Decal key={`muscle-${i}`} position={m.pos as any} rotation={m.rot as any} scale={[m.size, m.size, m.size]}>
+            <meshBasicMaterial 
+              color={m.color} 
+              transparent 
+              opacity={0.3} 
+              depthTest={false}
+              depthWrite={false}
+              polygonOffset
+              polygonOffsetFactor={-20}
+            />
+          </Decal>
+        ))}
       </mesh>
     </group>
   );

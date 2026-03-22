@@ -445,8 +445,9 @@ function App() {
   const [lockedCoords, setLockedCoords] = useState<string | null>(null);
   const [activePoint, setActivePoint] = useState<{ point: Point3D; normal: Point3D } | null>(null);
   
-  // ── Show Test 3D toggle ──
+  // ── Visualization toggles ───────────────────────────────────────────
   const [showTest3D, setShowTest3D] = useState(false);
+  const [showMuscles, setShowMuscles] = useState(false);
   const [isIntroAnimating, setIsIntroAnimating] = useState(true);
   const [isBackgroundRevealed, setIsBackgroundRevealed] = useState(false);
   const [isModelRevealed, setIsModelRevealed] = useState(false);
