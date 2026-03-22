@@ -8,7 +8,7 @@ import { ChatPanel } from './components/ChatPanel';
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
 import { playAISpeech, initAudio } from './lib/elevenlabs';
-import { MapPin, X } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 type DrawSession = {
   decalIds: string[];
@@ -16,6 +16,51 @@ type DrawSession = {
   centroid: Point3D;
   centroidNormal: Point3D;
 };
+
+const TOUR_STEPS = [
+  {
+    id: 'welcome',
+    title: 'Welcome to Agnos AI',
+    text: 'Hello! I am Agnos, your 3D medical diagnostic assistant powered by Claude. Let me show you around.',
+    target: null
+  },
+  {
+    id: 'inspect',
+    title: 'Interactive 3D Model',
+    text: 'You can rotate, zoom, and inspect this model. Hovering over regions will identify the anatomical structures.',
+    target: '.canvas-container'
+  },
+  {
+    id: 'paint',
+    title: 'Painting Mode',
+    text: 'Switch to Paint mode here to start marking your areas of concern.',
+    target: '.mode-switch'
+  },
+  {
+    id: 'draw',
+    title: 'Clinical Marking',
+    text: 'Click Start Draw, then drag your mouse over any affected area on the 3D model.',
+    target: '.btn-start'
+  },
+  {
+    id: 'voice',
+    title: 'Voice Interaction',
+    text: 'You can also speak to me naturally by clicking the microphone icon at any time.',
+    target: '.chat-mic'
+  },
+  {
+    id: 'report',
+    title: 'Download Report',
+    text: 'Once your diagnosis is complete, click this export icon to download a full clinical PDF report of your session.',
+    target: '.btn-text-toggle'
+  },
+  {
+    id: 'legal',
+    title: 'Important Disclaimer',
+    text: 'Please remember: Agnos is a screening tool for educational purposes only. Always consult a healthcare professional for clinical decisions.',
+    target: null
+  }
+];
 
 // Live telemetry for the camera viewport (rotations and zoom scalar)
 export function CameraMetricsUpdater() {
@@ -454,6 +499,11 @@ function App() {
   const [isTitleDocked, setIsTitleDocked] = useState(false);
   const [isLayoutAssembled, setIsLayoutAssembled] = useState(false);
   const [isTelemetryVisible, setIsTelemetryVisible] = useState(false);
+  
+  // Guided Tour State
+  const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
+  const isTourActive = tourStepIndex !== null;
+
   const orbitControlsRef = useRef<any>(null);
   const introSceneGroupRef = useRef<THREE.Group | null>(null);
 
@@ -461,8 +511,6 @@ function App() {
   const [isDrawMode, setIsDrawMode] = useState(true);
   const [isDrawingActive, setIsDrawingActive] = useState(false);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
-  const [isInstructionDismissed, setIsInstructionDismissed] = useState(false);
-  const [isInstructionClosing, setIsInstructionClosing] = useState(false);
 
   // ── Draw session refs ────────────────────────────────────────────────
   const currentSession = useRef<DrawSession | null>(null);
@@ -505,13 +553,16 @@ Keep it to exactly 3 sentences maximum for the subtitle reader.`;
 
     try {
       const response = await chatWithAssistant(apiMessages);
-      await initAudio(); 
-      await playAISpeech(response); // Await for sync
       const assistantMessage: Message = { id: Date.now().toString(), role: 'assistant', content: response };
+      
+      // Update UI first so transparency/subtitles show up immediately
       setMessages((prev) => [...prev, assistantMessage]);
+      setIsDiagnosing(false); // Clear loading state early
+
+      await initAudio(); 
+      await playAISpeech(response); 
     } catch (error) {
       console.error('Diagnosis failed:', error);
-    } finally {
       setIsDiagnosing(false);
     }
   };
@@ -564,13 +615,17 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
     try {
       const response = await chatWithAssistant(apiMessages);
+      const assistantMessage: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: response };
+      
+      // Update UI first
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsDiagnosing(false); // Clear loading state early
+      currentSession.current = null;
+
       await initAudio(); 
-      await playAISpeech(response); // Await for sync
-      setMessages((prev) => [
-        ...prev,
-        { id: (Date.now() + 1).toString(), role: 'assistant', content: response },
-      ]);
-    } finally {
+      await playAISpeech(response);
+    } catch (error) {
+      console.error('Draw diagnosis failed:', error);
       setIsDiagnosing(false);
       currentSession.current = null;
     }
@@ -581,16 +636,6 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
     currentSession.current = null;
     setIsDrawingActive(false);
     isStroking.current = false;
-    setIsInstructionClosing(false);
-    setIsInstructionDismissed(false);
-  };
-
-  const handleDismissInstruction = () => {
-    setIsInstructionClosing(true);
-    window.setTimeout(() => {
-      setIsInstructionClosing(false);
-      setIsInstructionDismissed(true);
-    }, 280);
   };
 
   // ─── Pointer handlers ─────────────────────────────────────────────────
@@ -663,6 +708,51 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
     return () => window.clearTimeout(timeout);
   }, [isLayoutAssembled]);
 
+  // Handle Tour Progress
+  useEffect(() => {
+    // 1. Clear ANY existing highlights first (from previous steps)
+    document.querySelectorAll('.tour-highlight').forEach(el => {
+      el.classList.remove('tour-highlight');
+      el.closest('.chat-header')?.classList.remove('tour-parent-lift');
+    });
+
+    if (tourStepIndex === null) return;
+    
+    const step = TOUR_STEPS[tourStepIndex];
+    if (step) {
+      // Start speaking the tip immediately
+      playAISpeech(step.text);
+
+      if (step.target) {
+        // Small grace period for React renders to settle
+        const timer = window.setTimeout(() => {
+          const target = document.querySelector(step.target!);
+          if (target) {
+            target.classList.add('tour-highlight');
+            // For nested buttons in the header, we may need to lift the header too
+            target.closest('.chat-header')?.classList.add('tour-parent-lift');
+          }
+        }, 50);
+        return () => window.clearTimeout(timer);
+      }
+    }
+  }, [tourStepIndex]);
+
+  const handleNextTour = () => {
+    if (tourStepIndex === null) return;
+    if (tourStepIndex < TOUR_STEPS.length - 1) {
+      setTourStepIndex(tourStepIndex + 1);
+    } else {
+      handleCompleteTour();
+    }
+  };
+
+  const handleCompleteTour = () => {
+    setTourStepIndex(null);
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  };
+
   // ─── Render ────────────────────────────────────────────────────────────
   return (
     <div
@@ -674,8 +764,24 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         isTitleDocked ? 'intro-title-docked' : 'intro-title-centered',
         isLayoutAssembled ? 'intro-layout-assembled' : '',
         isTelemetryVisible ? 'intro-telemetry-visible' : '',
+        isTourActive ? 'tour-active' : '',
       ].filter(Boolean).join(' ')}
     >
+      {isTourActive && (
+        <>
+          <div className="tour-overlay" onClick={handleNextTour} />
+          <div className="tour-caption-box">
+            <h4>{TOUR_STEPS[tourStepIndex].title}</h4>
+            <p>{TOUR_STEPS[tourStepIndex].text}</p>
+            <div className="tour-controls">
+              <button className="tour-btn-next" onClick={handleNextTour}>
+                {tourStepIndex === TOUR_STEPS.length - 1 ? 'Get Started' : 'Next Tip'}
+              </button>
+              <button className="tour-btn-skip" onClick={handleCompleteTour}>Skip Intro</button>
+            </div>
+          </div>
+        </>
+      )}
       <div className="canvas-container">
         <div className="intro-model-veil" />
         <div className="print-only-report-header">
@@ -690,58 +796,18 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         <div className="canvas-overlay-ui">
           <div className="intro-title-copy">
             <h1 className="title">AGNOS AI</h1>
-            <p className="subtitle">Advanced 3D Diagnosis System v3.0</p>
+            <p className="subtitle">Advanced 3D Diagnosis System powered by Claude</p>
           </div>
         </div>
 
-        {/* Camera Metrics UI locked to top-right of 3D frame overlay */}
-        <div className="camera-metrics-panel">
-          <strong style={{ color: 'var(--accent-cyan)' }}>Live Camera Telemetry</strong>
-          <div id="camera-metrics-text">Awaiting render state...</div>
-        </div>
-
-
-
         {/* Zone pill */}
-        {(hoveredZone || hoveredCoords || lockedCoords) && (
-          <div className="zone-pill" style={{ flexDirection: 'column', gap: '4px' }}>
+        {(hoveredZone || lockedCoords) && (
+          <div className="zone-pill">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <MapPin size={12} color={lockedCoords ? '#2047b7' : 'var(--accent-cyan)'} />
               <span style={{ fontWeight: 600 }}>{hoveredZone || 'Unknown Region'}</span>
-              {hoveredCoords && !lockedCoords && <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{hoveredCoords}</span>}
             </div>
-            {lockedCoords && (
-              <div style={{ fontSize: '0.75rem', color: '#2047b7', fontWeight: 700, background: 'rgba(65, 105, 225, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
-                LOCKED: {lockedCoords}
-              </div>
-            )}
-            {lockedCoords && <div style={{ fontSize: '0.65rem', opacity: 0.5 }}>(Click again in View mode to unlock)</div>}
-          </div>
-        )}
-
-        {/* Instruction overlay */}
-        {(decals.length === 0 && !isDrawingActive && !isInstructionDismissed) && (
-          <div
-            className={[
-              'instruction-overlay',
-              !isIntroAnimating ? 'instruction-overlay-ready' : '',
-              isInstructionClosing ? 'instruction-overlay-closing' : '',
-            ].filter(Boolean).join(' ')}
-          >
-            <button
-              type="button"
-              className="instruction-overlay-close"
-              onClick={handleDismissInstruction}
-              aria-label="Close instructions"
-            >
-              <X size={16} />
-            </button>
-            <h3>Select a Region to Diagnose</h3>
-            <p>
-              Switch to <strong>Paint</strong> mode → <strong>Start Draw</strong> → drag over the affected area.
-              <br />
-              Or enable <strong>Test 3D</strong> to reveal internal structures.
-            </p>
+            {lockedCoords && <div style={{ fontSize: '0.65rem', opacity: 0.5, marginTop: '4px' }}>(Click again in View mode to unlock)</div>}
           </div>
         )}
 
@@ -759,7 +825,10 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
               onRevealModel={() => setIsModelRevealed(true)}
               onTitleDock={() => setIsTitleDocked(true)}
               onLayoutAssemble={() => setIsLayoutAssembled(true)}
-              onComplete={() => setIsIntroAnimating(false)}
+              onComplete={() => {
+                setIsIntroAnimating(false);
+                setTourStepIndex(0); // Trigger tour when intro finishes
+              }}
             />
           )}
           <CameraMetricsUpdater />
