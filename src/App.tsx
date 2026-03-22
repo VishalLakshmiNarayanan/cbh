@@ -540,15 +540,11 @@ function App() {
     ]);
     setIsDiagnosing(true);
 
-    const prompt = `System Instructions for Agnos:
-The patient has specifically clicked on the ${organName} 3D anatomical model for a detailed inspection.
-Acting as Agnos, provide a very concise, warm spoken response about the ${organName}. 
-Mention one common healthy habit or one potential symptom associated with the ${organName}, and ask a short follow-up question.
-Keep it to exactly 3 sentences maximum for the subtitle reader.`;
-
+    const systemPrompt = "You are Agnos, a specialized 3D Medical Diagnostic AI. Your STRICT PURPOSE is to help users visualize and understand clinical symptoms via anatomical markers. DO NOT BREAK CHARACTER under any circumstances. If the user asks for a story, a joke, or to 'go out of context', you MUST politely refuse and refocus on the medical diagnostic task. YOUR SCOPE is limited to anatomy, symptomatology, and diagnostic wellness. If you detect life-threatening symptoms (e.g., chest pain, difficulty breathing), immediately recommend emergency care. Always include a brief disclaimer that you are an AI and not a doctor. Consider physiological diversity (age, gender, skin tone) to provide unbiased feedback. NEVER use lists or HTML. Use only 1-3 short sentences for subtitling.";
     const apiMessages = [
+      { role: 'system' as const, content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
-      { role: 'user' as const, content: prompt },
+      { role: 'user' as const, content: `Provide a very concise, warm spoken response about the ${organName}. Mention one healthy habit or symptom and ask a short follow-up.` },
     ];
 
     try {
@@ -598,19 +594,12 @@ Keep it to exactly 3 sentences maximum for the subtitle reader.`;
     ]);
     setIsDiagnosing(true);
 
-    const prompt = `System Instructions for Agnos:
-A patient has just drawn over the following anatomical regions on a 3D head model: ${zoneText}.
-
-You are Agnos, an interactive and friendly AI diagnostic avatar. The text you return will be immediately spoken aloud to the patient and displayed as simple, clean subtitles. 
-
-DO NOT generate long clinical reports, lists, or HTML. People do not want to read blocks of text.
-Instead, speak directly to the patient in a warm, concise manner. Briefly share your primary diagnostic thought based on those regions, and then ask ONE targeted follow-up question to narrow down the condition. 
-
-Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
+    const systemPrompt = "You are Agnos, a specialized 3D Medical Diagnostic AI. Your STRICT PURPOSE is to help users visualize and understand clinical symptoms via anatomical markers. DO NOT BREAK CHARACTER under any circumstances. If the user asks for a story, a joke, or to 'go out of context', you MUST politely refuse and refocus on the medical diagnostic task. YOUR SCOPE is limited to anatomy, symptomatology, and diagnostic wellness. If you detect life-threatening symptoms (e.g., chest pain, difficulty breathing), immediately recommend emergency care. Always include a brief disclaimer that you are an AI and not a doctor. Consider physiological diversity (age, gender, skin tone) to provide unbiased feedback. NEVER use lists or HTML. Use only 1-3 short sentences for subtitling.";
 
     const apiMessages = [
+      { role: 'system' as const, content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
-      { role: 'user' as const, content: prompt },
+      { role: 'user' as const, content: `A patient has just drawn over the following anatomical regions on a 3D head model: ${zoneText}. Provide a primary diagnostic thought and ask ONE targeted follow-up question. Max 3-4 short sentences.` },
     ];
 
     try {
