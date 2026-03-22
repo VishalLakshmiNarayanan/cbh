@@ -29,7 +29,7 @@ export function playAISpeech(text: string, onStart?: () => void): Promise<void> 
     // Strip HTML tags so the voice doesn't read "H 3 Clinical Observations..." literally
     const cleanText = text.replace(/<[^>]*>?/gm, '');
 
-    const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+    const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY?.trim();
 
     if (!apiKey || apiKey.includes('your_eleven_labs_api_key_here')) {
       console.error("No valid ElevenLabs API key found! Please update VITE_ELEVENLABS_API_KEY in your .env");

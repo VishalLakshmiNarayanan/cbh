@@ -3,6 +3,8 @@ import { useGLTF, Decal, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { DecalData, Point3D } from '../types';
+import { getNearestMarker } from '../lib/facialMarkers';
+
 
 interface FaceModelProps {
   decals: DecalData[];
@@ -53,7 +55,7 @@ interface FaceModelProps {
  */
 
 // Actual geometry bounds — seeded with real values from console log, precision-updated on load
-export const faceBounds = {
+const faceBounds = {
   minY: -3.97, maxY: 3.97,
   minX: -4.28, maxX: 4.28,
   minZ: -2.59, maxZ:  2.55,  // maxZ estimated; corrected on load
@@ -66,156 +68,26 @@ let boundsInitialized = false;
  */
 
 function getFacialZone(y: number, x: number, z: number): string {
-  const absX = Math.abs(x);
-  const isRight = x < 0; 
-
-  // --- 1. PROTRUDING MIDLINE (NOSE) ---
-  if (z > 1.50 && absX < 0.75) {
-    if (y > -0.30) return 'Nose Bridge / Dorsum';
-    if (y > -1.30) return 'Nasal Tip / Ala';
-  }
-
-  const isBack = z < -0.47;
-
-  // ── CROWN & SCALP (y > 2.58) ──
-  if (y > 2.58) {
-    if (isBack) {
-      if (absX < 0.99) return 'Posterior Vertex / Occiput';
-      if (absX < 1.97) return isRight ? 'Right Occipital Scalp' : 'Left Occipital Scalp';
-      return isRight ? 'Right Temporal Scalp' : 'Left Temporal Scalp';
-    }
-    if (absX < 0.72) return 'Crown / Vertex';
-    if (absX < 1.97) return isRight ? 'Right Parietal Scalp' : 'Left Parietal Scalp';
-    return isRight ? 'Right Temporal Scalp' : 'Left Temporal Scalp';
-  }
-
-  // ── FOREHEAD (y > 1.59) ──
-  if (y > 1.59) {
-    if (isBack) {
-      if (absX < 0.72) return 'Occipital (Upper)';
-      if (absX < 1.91) return isRight ? 'Right Occipital' : 'Left Occipital';
-      return isRight ? 'Right Mastoid / Temporal Bone' : 'Left Mastoid / Temporal Bone';
-    }
-    if (absX < 0.66) return 'Central Forehead';
-    if (absX < 1.48) return isRight ? 'Right Forehead' : 'Left Forehead';
-    if (absX < 2.30) return isRight ? 'Right Temple' : 'Left Temple';
-    return isRight ? 'Right Temporal Fossa' : 'Left Temporal Fossa';
-  }
-
-  // ── SUPRAORBITAL / BROW (y > 0.99) ──
-  if (y > 0.99) {
-    if (isBack) {
-      if (absX < 0.72) return 'Mid Occipital / Inion';
-      if (absX < 1.91) return isRight ? 'Right Posterior Parietal' : 'Left Posterior Parietal';
-      return isRight ? 'Right Mastoid Region' : 'Left Mastoid Region';
-    }
-    if (absX < 0.53) return 'Glabella (Between Brows)';
-    if (absX < 1.32) return isRight ? 'Right Supraorbital Ridge' : 'Left Supraorbital Ridge';
-    return isRight ? 'Right Zygomatic Arch / Temple' : 'Left Zygomatic Arch / Temple';
-  }
-
-  // ── EYE REGION (y > 0.40) ──
-  if (y > 0.40) {
-    if (isBack) {
-      if (absX < 0.72) return 'Lower Occipital';
-      if (absX < 1.81) return isRight ? 'Right Suboccipital' : 'Left Suboccipital';
-      return isRight ? 'Right Posterior Neck (Upper)' : 'Left Posterior Neck (Upper)';
-    }
-    if (absX < 0.53) return 'Nasal Bridge / Nasion';
-    if (absX < 0.99) return isRight ? 'Right Medial Canthus' : 'Left Medial Canthus';
-    if (absX < 1.71) return isRight ? 'Right Eyelid / Orbital' : 'Left Eyelid / Orbital';
-    return isRight ? 'Right Lateral Canthus' : 'Left Lateral Canthus';
-  }
-
-  // ── NOSE & CHEEKS (y > -0.79) ──
-  if (y > -0.79) {
-    if (isBack) {
-      if (absX < 0.72) return 'Nuchal / C1–C2 Region';
-      if (absX < 1.81) return isRight ? 'Right Posterior Neck' : 'Left Posterior Neck';
-      return isRight ? 'Right Trapezius (Upper)' : 'Left Trapezius (Upper)';
-    }
-    if (absX < 0.72) return isRight ? 'Right Nasal Sidewall / Ala' : 'Left Nasal Sidewall / Ala';
-    if (absX < 1.65) return isRight ? 'Right Cheek / Maxillary' : 'Left Cheek / Maxillary';
-    if (absX < 2.37) return isRight ? 'Right Zygomatic / Cheekbone' : 'Left Zygomatic / Cheekbone';
-    return isRight ? 'Right Ear / Auricular' : 'Left Ear / Auricular';
-  }
-
-  // ── LOWER FACE & NECK TRANSITION (y <= -0.79) ──
-  if (y <= -0.79) {
-    // Determine depth context
-    const isBackLocal = z < -0.47;
-    const isCenter = absX < 0.70;
-
-    // --- Midline / Central Neck structures ---
-    if (isCenter) {
-      // 1. Chin Tip / Mandible Base (Z > 0.4 ensures it's front)
-      if (y > -1.55 && z > 0.35) return 'Chin / Mentalis';
-      
-      // 2. Thyroid / Neck Midline
-      if (y > -2.10 && z > 0.35) {
-        return y > -1.75 ? 'Thyroid Cartilage' : 'Thyroid Gland (Anterior)';
-      }
-      if (y > -3.30 && z > 0.35) return 'Anterior Neck / Platysma';
-      if (z > 0.35) return 'Sternal Notch / Breastbone';
-    }
-      
-      if (isBackLocal) {
-        if (y > -1.98) return 'Cervical Spine (C3–C4)';
-        if (y > -3.17) return 'Cervical Spine (C4–C5)';
-        return 'Posterior Neck / Nuchal';
-      }
-    
-
-    // --- Lateral Jaw vs Neck transition ---
-    if (y > -1.25) {
-      if (absX < 1.32 && !isBackLocal) return isRight ? 'Right Mandible / Chin Base' : 'Left Mandible / Chin Base';
-      if (absX < 2.14 && !isBackLocal) return isRight ? 'Right Jaw / Masseter' : 'Left Jaw / Masseter';
-      if (absX >= 2.14 && !isBackLocal) return isRight ? 'Right Mandibular Angle' : 'Left Mandibular Angle';
-    }
-
-    // Deep neck / Muscle regions
-    if (y > -3.30) {
-      if (isBackLocal) {
-        if (absX < 1.91) return isRight ? 'Right SCM / Posterior' : 'Left SCM / Posterior';
-        return isRight ? 'Right Upper Trapezius' : 'Left Upper Trapezius';
-      }
-      
-      // Frontal/Lateral muscle bundles
-      if (absX < 1.85) return isRight ? 'Right Sternocleidomastoid' : 'Left Sternocleidomastoid';
-      if (absX < 2.35) return isRight ? 'Right Scalenus / SCM' : 'Left Scalenus / SCM';
-      return isRight ? 'Right Trapezius (Lateral)' : 'Left Trapezius (Lateral)';
-    }
-
-    // --- Base of Neck / Shoulder border ---
-    if (isBackLocal) {
-      if (absX < 1.91) return isRight ? 'Right Trapezius' : 'Left Trapezius';
-      return isRight ? 'Right Shoulder / Trapezius' : 'Left Shoulder / Trapezius';
-    }
-    
-    if (absX > 2.0) return isRight ? 'Right Scalenus / Shoulder' : 'Left Scalenus / Shoulder';
-    if (absX < 1.85) return isRight ? 'Right SCM / Lower' : 'Left SCM / Lower';
-    return isRight ? 'Right Trapezius' : 'Left Trapezius';
-  }
-
-  // ── BASE / FALLBACK ──────────────────────────────────────────────────────
-  if (absX < 0.30) return 'Clavicular / Sternal Notch';
-  return isRight ? 'Right Shoulder / Trapezius' : 'Left Shoulder / Trapezius';
+  return getNearestMarker(x, y, z);
 }
 
 const MUSCLE_REGIONS = [
   { name: 'Frontalis', pos: [0, 2.2, 1.2], rot: [0,0,0], size: 2.5, color: '#ff5500' },
-  { name: 'Orbicularis Oculi R', pos: [-1.2, 0.8, 1.6], rot: [0,0.5,0], size: 1.2, color: '#ff0055' },
-  { name: 'Orbicularis Oculi L', pos: [1.2, 0.8, 1.6], rot: [0,-0.5,0], size: 1.2, color: '#ff0055' },
-  { name: 'Zygomaticus R', pos: [-1.8, -0.2, 1.4], rot: [0,0.8,0], size: 1.0, color: '#ffaa00' },
-  { name: 'Zygomaticus L', pos: [1.8, -0.2, 1.4], rot: [0,-0.8,0], size: 1.0, color: '#ffaa00' },
-  { name: 'Masseter R', pos: [-2.2, -1.8, 0.8], rot: [0,1.2,0], size: 1.5, color: '#aa55ff' },
-  { name: 'Masseter L', pos: [2.2, -1.8, 0.8], rot: [0,-1.2,0], size: 1.5, color: '#aa55ff' },
-  { name: 'Platysma', pos: [0, -3.2, 1.2], rot: [0,0,0], size: 3.5, color: '#00aaff' },
-  { name: 'SCM R', pos: [-1.5, -2.8, 0.2], rot: [0,1.5,0], size: 2.0, color: '#55ff00' },
-  { name: 'SCM L', pos: [1.5, -2.8, 0.2], rot: [0,-1.5,0], size: 2.0, color: '#55ff00' },
-  { name: 'Trapezius R', pos: [-3.5, -2.5, -0.5], rot: [0,2.0,0], size: 3.0, color: '#ffcc00' },
-  { name: 'Trapezius L', pos: [3.5, -2.5, -0.5], rot: [0,-2.0,0], size: 3.0, color: '#ffcc00' },
+  { name: 'Orbicularis Oculi L', pos: [-1.2, 0.8, 1.6], rot: [0,0.5,0], size: 1.2, color: '#ff0055' },
+  { name: 'Orbicularis Oculi R', pos: [1.2, 0.8, 1.6], rot: [0,-0.5,0], size: 1.2, color: '#ff0055' },
+  { name: 'Zygomaticus L', pos: [-1.8, -0.2, 1.4], rot: [0,0.8,0], size: 1.0, color: '#ffaa00' },
+  { name: 'Zygomaticus R', pos: [1.8, -0.2, 1.4], rot: [0,-0.8,0], size: 1.0, color: '#ffaa00' },
+  { name: 'Masseter L', pos: [-2.2, -1.8, 0.8], rot: [0,1.2,0], size: 1.5, color: '#aa55ff' },
+  { name: 'Masseter R', pos: [2.2, -1.8, 0.8], rot: [0,-1.2,0], size: 1.5, color: '#aa55ff' },
+  { name: 'Platysma', pos: [-0.53, -1.59, 0.57], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#00aaff' },
+  { name: 'Trapezius R', pos: [-2.77, -2.28, -0.17], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#ffcc00' },
+  { name: 'Trapezius L', pos: [2.77, -2.28, -0.17], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#ffcc00' },
+  { name: 'Scalenus', pos: [2.34, -3.21, 0.70], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#00ffaa' },
+  { name: 'Sternum', pos: [0.11, -3.49, 0.94], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#ffffff' },
+  { name: 'Thyroid Cartilage', pos: [-0.07, -1.01, 1.04], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#ff8888' },
+  { name: 'Thyroid Gland', pos: [-0.09, -1.21, 0.93], rot: [-0.11, 0.05, 0.005], size: 2.59, color: '#ff4444' },
 ];
+
 
 function getDecalRotation(normal: Point3D): [number, number, number] {
   const n = new THREE.Vector3(normal.x, normal.y, normal.z).normalize();
