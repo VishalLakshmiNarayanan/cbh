@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, type RefObject } from 'react';
+import { useState, useRef, useCallback, useEffect, type MutableRefObject, type RefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
@@ -35,25 +35,72 @@ export function CameraMetricsUpdater() {
 
 function IntroCameraAnimation({
   controlsRef,
+  sceneGroupRef,
+  onBackgroundReveal,
+  onRevealModel,
+  onTitleDock,
+  onLayoutAssemble,
   onComplete,
 }: {
   controlsRef: RefObject<any>;
+  sceneGroupRef: MutableRefObject<THREE.Group | null>;
+  onBackgroundReveal: () => void;
+  onRevealModel: () => void;
+  onTitleDock: () => void;
+  onLayoutAssemble: () => void;
   onComplete: () => void;
 }) {
   const { camera } = useThree();
   const elapsedRef = useRef(0);
+  const hasRevealedBackgroundRef = useRef(false);
+  const hasRevealedModelRef = useRef(false);
+  const hasDockedTitleRef = useRef(false);
+  const hasAssembledLayoutRef = useRef(false);
+  const hasCompletedRef = useRef(false);
   const startPosition = useRef(new THREE.Vector3(0, 0, 21.61));
   const endPosition = useRef(new THREE.Vector3(0, 0, 36.10));
   const startTarget = useRef(new THREE.Vector3(0, 0.08, 0));
   const endTarget = useRef(new THREE.Vector3(0, 0, 0));
-  const duration = 1.8;
+  const duration = 4.8;
 
   useFrame((_, delta) => {
     elapsedRef.current += delta;
     const progress = Math.min(elapsedRef.current / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const zoomProgress = THREE.MathUtils.smoothstep(progress, 0.22, 1);
+    const settleProgress = THREE.MathUtils.smoothstep(progress, 0.46, 1);
+    const spinProgress = THREE.MathUtils.smoothstep(progress, 0.24, 0.72);
+    const eased = 1 - Math.pow(1 - zoomProgress, 3);
 
     camera.position.lerpVectors(startPosition.current, endPosition.current, eased);
+
+    if (!hasRevealedBackgroundRef.current && progress >= 0.12) {
+      hasRevealedBackgroundRef.current = true;
+      onBackgroundReveal();
+    }
+
+    if (!hasDockedTitleRef.current && progress >= 0.37) {
+      hasDockedTitleRef.current = true;
+      onTitleDock();
+    }
+
+    if (!hasRevealedModelRef.current && progress >= 0.46) {
+      hasRevealedModelRef.current = true;
+      onRevealModel();
+    }
+
+    if (!hasAssembledLayoutRef.current && progress >= 0.68) {
+      hasAssembledLayoutRef.current = true;
+      onLayoutAssemble();
+    }
+
+    if (sceneGroupRef.current) {
+      sceneGroupRef.current.position.set(
+        THREE.MathUtils.lerp(0, -0.9, settleProgress),
+        0,
+        0
+      );
+      sceneGroupRef.current.rotation.set(0, spinProgress * Math.PI * 2, 0);
+    }
 
     if (controlsRef.current) {
       controlsRef.current.target.lerpVectors(startTarget.current, endTarget.current, eased);
@@ -62,7 +109,8 @@ function IntroCameraAnimation({
       camera.lookAt(endTarget.current);
     }
 
-    if (progress >= 1) {
+    if (!hasCompletedRef.current && progress >= 1) {
+      hasCompletedRef.current = true;
       onComplete();
     }
   });
@@ -400,7 +448,13 @@ function App() {
   // ── Show Test 3D toggle ──
   const [showTest3D, setShowTest3D] = useState(false);
   const [isIntroAnimating, setIsIntroAnimating] = useState(true);
+  const [isBackgroundRevealed, setIsBackgroundRevealed] = useState(false);
+  const [isModelRevealed, setIsModelRevealed] = useState(false);
+  const [isTitleDocked, setIsTitleDocked] = useState(false);
+  const [isLayoutAssembled, setIsLayoutAssembled] = useState(false);
+  const [isTelemetryVisible, setIsTelemetryVisible] = useState(false);
   const orbitControlsRef = useRef<any>(null);
+  const introSceneGroupRef = useRef<THREE.Group | null>(null);
 
   // ── Draw mode state ───────────────────────────────────────────────────
   const [isDrawMode, setIsDrawMode] = useState(true);
@@ -583,10 +637,34 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
     minute: '2-digit',
   });
 
+  useEffect(() => {
+    if (!isLayoutAssembled) {
+      setIsTelemetryVisible(false);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setIsTelemetryVisible(true);
+    }, 520);
+
+    return () => window.clearTimeout(timeout);
+  }, [isLayoutAssembled]);
+
   // ─── Render ────────────────────────────────────────────────────────────
   return (
-    <div className="app-container">
+    <div
+      className={[
+        'app-container',
+        isIntroAnimating ? 'intro-active' : '',
+        isBackgroundRevealed ? 'intro-background-revealed' : '',
+        isModelRevealed ? 'intro-model-revealed' : '',
+        isTitleDocked ? 'intro-title-docked' : 'intro-title-centered',
+        isLayoutAssembled ? 'intro-layout-assembled' : '',
+        isTelemetryVisible ? 'intro-telemetry-visible' : '',
+      ].filter(Boolean).join(' ')}
+    >
       <div className="canvas-container">
+        <div className="intro-model-veil" />
         <div className="print-only-report-header">
           <div className="print-report-meta">{printTimestamp}</div>
           <div className="print-report-brand">
@@ -597,8 +675,10 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
         {/* Title */}
         <div className="canvas-overlay-ui">
-          <h1 className="title">AGNOS AI</h1>
-          <p className="subtitle">Advanced 3D Diagnosis System v3.0</p>
+          <div className="intro-title-copy">
+            <h1 className="title">AGNOS AI</h1>
+            <p className="subtitle">Advanced 3D Diagnosis System v3.0</p>
+          </div>
         </div>
 
         {/* Camera Metrics UI locked to top-right of 3D frame overlay */}
@@ -647,34 +727,41 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
           {isIntroAnimating && (
             <IntroCameraAnimation
               controlsRef={orbitControlsRef}
+              sceneGroupRef={introSceneGroupRef}
+              onBackgroundReveal={() => setIsBackgroundRevealed(true)}
+              onRevealModel={() => setIsModelRevealed(true)}
+              onTitleDock={() => setIsTitleDocked(true)}
+              onLayoutAssemble={() => setIsLayoutAssembled(true)}
               onComplete={() => setIsIntroAnimating(false)}
             />
           )}
           <CameraMetricsUpdater />
 
-          {/* The LeePerrySmith head with decals, scaled ×2 */}
-          <FaceModel
-            decals={decals}
-            onFaceDown={handleFaceDown}
-            onFaceMove={handleFaceMove}
-            onFaceUp={handleFaceUp}
-            hoveredZone={hoveredZone}
-            setHoveredZone={setHoveredZone}
-            setHoveredCoords={setHoveredCoords}
-            setLockedCoords={setLockedCoords}
-            isDrawMode={isDrawMode}
-            isDrawingActive={isDrawingActive}
-            showTest3D={showTest3D}
-          />
+          <group ref={introSceneGroupRef}>
+            {/* The LeePerrySmith head with decals, scaled ×2 */}
+            <FaceModel
+              decals={decals}
+              onFaceDown={handleFaceDown}
+              onFaceMove={handleFaceMove}
+              onFaceUp={handleFaceUp}
+              hoveredZone={hoveredZone}
+              setHoveredZone={setHoveredZone}
+              setHoveredCoords={setHoveredCoords}
+              setLockedCoords={setLockedCoords}
+              isDrawMode={isDrawMode}
+              isDrawingActive={isDrawingActive}
+              showTest3D={showTest3D}
+            />
 
-          {showTest3D && (
-            <group scale={2}>
-              <TestBrownEyeballs onClick={handleOrganClick} />
-              <TestBrain onClick={handleOrganClick} />
-              <TestLarynx onClick={handleOrganClick} />
-              <TestTongue onClick={handleOrganClick} />
-            </group>
-          )}
+            {showTest3D && (
+              <group scale={2}>
+                <TestBrownEyeballs onClick={handleOrganClick} />
+                <TestBrain onClick={handleOrganClick} />
+                <TestLarynx onClick={handleOrganClick} />
+                <TestTongue onClick={handleOrganClick} />
+              </group>
+            )}
+          </group>
 
 
 
@@ -692,25 +779,27 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         </Canvas>
       </div>
 
-      <ChatPanel
-        messages={messages}
-        setMessages={setMessages}
-        addDecal={addDecal}
-        hoveredZone={hoveredZone}
-        hoveredCoords={hoveredCoords}
-        activePoint={activePoint}
-        isDiagnosing={isDiagnosing}
-        isDrawMode={isDrawMode}
-        setIsDrawMode={setIsDrawMode}
-        isDrawingActive={isDrawingActive}
-        setIsDrawingActive={setIsDrawingActive}
-        handleStartDraw={handleStartDraw}
-        handleEndDraw={handleEndDraw}
-        handleClear={handleClear}
-        hasDecals={decals.length > 0}
-        showTest3D={showTest3D}
-        setShowTest3D={setShowTest3D}
-      />
+      <div className="chat-panel-shell">
+        <ChatPanel
+          messages={messages}
+          setMessages={setMessages}
+          addDecal={addDecal}
+          hoveredZone={hoveredZone}
+          hoveredCoords={hoveredCoords}
+          activePoint={activePoint}
+          isDiagnosing={isDiagnosing}
+          isDrawMode={isDrawMode}
+          setIsDrawMode={setIsDrawMode}
+          isDrawingActive={isDrawingActive}
+          setIsDrawingActive={setIsDrawingActive}
+          handleStartDraw={handleStartDraw}
+          handleEndDraw={handleEndDraw}
+          handleClear={handleClear}
+          hasDecals={decals.length > 0}
+          showTest3D={showTest3D}
+          setShowTest3D={setShowTest3D}
+        />
+      </div>
     </div>
   );
 }
