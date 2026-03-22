@@ -1,20 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-color: #fef9f7;
+  --bg-color: #ffffff;
   --text-primary: #111111; 
   --text-secondary: #6e6b68;
-  --accent-cyan: #ff6b52;  
-  --accent-purple: #ff9d82; 
+  --accent-cyan: #4169E1;
+  --accent-purple: #4169E1;
   
   --panel-bg: rgba(255, 255, 255, 0.75);
   --panel-blur: blur(28px);
-  --glass-border: rgba(255, 175, 155, 0.35);
+  --glass-border: rgba(65, 105, 225, 0.35);
   --subtle-border: rgba(0, 0, 0, 0.05);
   
-  --shadow-sm: 0 2px 8px rgba(255, 107, 82, 0.08);
-  --shadow-md: 0 8px 24px rgba(255, 107, 82, 0.12);
-  --shadow-lg: 0 16px 48px rgba(255, 107, 82, 0.18);
+  --shadow-sm: 0 2px 8px rgba(65, 105, 225, 0.12);
+  --shadow-md: 0 8px 24px rgba(65, 105, 225, 0.18);
+  --shadow-lg: 0 16px 48px rgba(65, 105, 225, 0.22);
 }
 
 * {
@@ -42,11 +42,25 @@ body {
   width: 100%;
   height: 100%;
   position: relative;
-  background-image: 
-    radial-gradient(circle at 15% 85%, rgba(255, 157, 130, 0.25) 0%, transparent 60%),
-    radial-gradient(circle at 85% 15%, rgba(255, 230, 215, 0.5) 0%, transparent 60%),
-    radial-gradient(circle at 45% 45%, rgba(255, 107, 82, 0.08) 0%, transparent 50%);
+  isolation: isolate;
   background-color: var(--bg-color);
+}
+
+.app-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    #ffffff;
+  background-image:
+    radial-gradient(circle at top center, rgba(59, 130, 246, 0.5), transparent 70%);
+  filter: none;
+}
+
+.app-container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .canvas-container {
@@ -68,11 +82,11 @@ body {
   font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, var(--accent-cyan), #ff3624);
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 10px rgba(255, 107, 82, 0.2));
+  filter: drop-shadow(0 2px 10px rgba(65, 105, 225, 0.2));
 }
 
 .subtitle {
@@ -81,6 +95,7 @@ body {
   color: var(--text-secondary);
   margin-top: 0.25rem;
   letter-spacing: 0.5px;
+  text-shadow: none;
 }
 
 .chat-panel {
@@ -120,7 +135,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--accent-cyan);
-  box-shadow: 0 4px 12px rgba(255, 107, 82, 0.3);
+  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.24);
   background: #fff;
   flex-shrink: 0;
 }
@@ -141,9 +156,9 @@ body {
 }
 
 @keyframes pulse {
-  0%   { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 107, 82, 0.4); }
-  70%  { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 107, 82, 0); }
-  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 107, 82, 0); }
+  0%   { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(65, 105, 225, 0.35); }
+  70%  { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(65, 105, 225, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(65, 105, 225, 0); }
 }
 
 .control-bar {
@@ -204,17 +219,17 @@ body {
   background: #fff; border: 1px solid var(--accent-cyan);
   color: var(--accent-cyan); padding: 0.55rem 1rem; font-size: 0.8rem;
   border-radius: 8px; cursor: pointer; transition: all 0.2s;
-  font-weight: 600; box-shadow: 0 2px 8px rgba(255, 107, 82, 0.05);
+  font-weight: 600; box-shadow: 0 2px 8px rgba(65, 105, 225, 0.12);
 }
 .btn-start:hover {
   background: var(--accent-cyan); color: #fff;
-  box-shadow: 0 4px 12px rgba(255, 107, 82, 0.25);
+  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.22);
   transform: translateY(-1px);
 }
 
 .btn-end {
   display: flex; align-items: center; gap: 0.4rem;
-  background: linear-gradient(135deg, var(--accent-cyan), #ff3624);
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan));
   border: none; box-shadow: var(--shadow-sm);
   color: #fff; padding: 0.6rem 1rem; font-size: 0.8rem;
   border-radius: 8px; cursor: pointer; font-weight: 600;
@@ -228,8 +243,8 @@ body {
 }
 
 @keyframes endPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 82, 0.4); }
-  50%       { box-shadow: 0 0 0 6px rgba(255, 107, 82, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(65, 105, 225, 0.35); }
+  50%       { box-shadow: 0 0 0 6px rgba(65, 105, 225, 0); }
 }
 
 .btn-clear {
@@ -239,8 +254,8 @@ body {
   border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;
 }
 .btn-clear:hover:not(:disabled) {
-  background: rgba(255, 54, 36, 0.08);
-  color: #ff3624;
+  background: rgba(65, 105, 225, 0.1);
+  color: #4169E1;
 }
 .btn-clear:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -251,9 +266,9 @@ body {
 .organ-toggle-btn {
   display: flex; align-items: center; gap: 0.4rem;
   background: #fff; border: 1px solid var(--accent-purple);
-  color: #fb8867; padding: 0.55rem 0.95rem; font-size: 0.8rem;
+  color: #4169E1; padding: 0.55rem 0.95rem; font-size: 0.8rem;
   border-radius: 8px; cursor: pointer; transition: 0.2s;
-  font-weight: 600; box-shadow: 0 2px 8px rgba(255, 157, 130, 0.05);
+  font-weight: 600; box-shadow: 0 2px 8px rgba(65, 105, 225, 0.12);
 }
 .organ-toggle-btn:hover, .organ-toggle-btn.active {
   background: var(--accent-purple); color: #fff;
@@ -262,7 +277,7 @@ body {
 .organ-filter-btn {
   display: flex; align-items: center; justify-content: center;
   width: 36px; height: 36px; background: #fff;
-  border: 1px solid var(--accent-purple); color: #fb8867;
+  border: 1px solid var(--accent-purple); color: #4169E1;
   border-radius: 8px; cursor: pointer; transition: 0.2s;
 }
 .organ-filter-btn:hover { background: var(--accent-purple); color: #fff; }
@@ -273,7 +288,7 @@ body {
   font-weight: 500;
 }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-.status-dot.drawing { background: #ff3624; animation: endPulse 0.8s infinite; }
+.status-dot.drawing { background: #4169E1; animation: endPulse 0.8s infinite; }
 .status-dot.diagnosing { background: var(--accent-cyan); animation: pulse 1.2s infinite; }
 
 .organ-filter-panel {
@@ -291,7 +306,7 @@ body {
 }
 
 .btn-text-toggle {
-  background: none; border: none; color: #fb8867;
+  background: none; border: none; color: #4169E1;
   font-weight: 700; font-size: 0.75rem; cursor: pointer;
   transition: color 0.2s; display: flex; align-items: center; justify-content: center;
 }
@@ -345,7 +360,7 @@ body {
   position: relative;
   background: #fff;
   border: 4px solid var(--accent-cyan);
-  box-shadow: 0 8px 32px rgba(255, 107, 82, 0.25);
+  box-shadow: 0 8px 32px rgba(65, 105, 225, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -436,7 +451,7 @@ body {
   display: flex;
   gap: 0.75rem;
   position: relative;
-  background: rgba(255, 246, 240, 0.5);
+  background: rgba(65, 105, 225, 0.08);
   border: 1px solid rgba(0,0,0,0.06);
   padding: 0.5rem;
   border-radius: 16px;
@@ -446,8 +461,8 @@ body {
 
 .chat-input-form:focus-within {
   background: #fff;
-  border-color: rgba(255, 107, 82, 0.4);
-  box-shadow: 0 4px 20px rgba(255, 107, 82, 0.15), inset 0 0 0 1px rgba(255, 107, 82, 0.1);
+  border-color: rgba(65, 105, 225, 0.35);
+  box-shadow: 0 4px 20px rgba(65, 105, 225, 0.15), inset 0 0 0 1px rgba(65, 105, 225, 0.1);
 }
 
 .chat-input {
@@ -484,7 +499,7 @@ body {
 }
 
 .chat-submit {
-  background: linear-gradient(135deg, var(--accent-cyan), #ff3624);
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan));
   border: none;
   border-radius: 12px;
   min-width: 48px;
@@ -520,27 +535,21 @@ body {
   backdrop-filter: blur(10px);
 }
 
-<<<<<<< HEAD
-.camera-metrics-panel {
+.selected-organ-card {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 1);
-  padding: 0.8rem 1.25rem;
-  border-radius: 12px;
-  font-family: monospace;
-  font-weight: 600;
-  color: var(--text-primary);
+  top: 7.5rem;
+  left: 3rem;
   z-index: 20;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(10px);
-  pointer-events: none;
+  max-width: 26rem;
+  padding: 1rem 1.15rem;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
+  color: rgba(248, 250, 252, 0.94);
+  backdrop-filter: blur(14px);
 }
-.camera-metrics-panel strong { display: block; margin-bottom: 0.35rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
 
-=======
->>>>>>> 618c298 (feat:deployment build fixes)
 .typing-dots { display: flex; gap: 4px; }
 .typing-dots span {
   width: 6px; height: 6px; background-color: var(--accent-cyan); border-radius: 50%;

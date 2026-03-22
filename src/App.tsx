@@ -291,12 +291,12 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         {(hoveredZone || hoveredCoords || lockedCoords) && (
           <div className="zone-pill" style={{ flexDirection: 'column', gap: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MapPin size={12} color={lockedCoords ? '#ff3624' : 'var(--accent-cyan)'} />
+              <MapPin size={12} color={lockedCoords ? '#4169E1' : 'var(--accent-cyan)'} />
               <span style={{ fontWeight: 600 }}>{hoveredZone || 'Unknown Region'}</span>
               {hoveredCoords && !lockedCoords && <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{hoveredCoords}</span>}
             </div>
             {lockedCoords && (
-              <div style={{ fontSize: '0.75rem', color: '#ff3624', fontWeight: 700, background: 'rgba(255, 54, 36, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#4169E1', fontWeight: 700, background: 'rgba(65, 105, 225, 0.12)', padding: '2px 8px', borderRadius: '4px' }}>
                 LOCKED: {lockedCoords}
               </div>
             )}
@@ -332,7 +332,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         <Canvas camera={{ position: [0, 0, 12], fov: 35 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
           <ambientLight intensity={1.2} />
           <spotLight position={[5, 10, 5]} intensity={2.0} penumbra={1} castShadow angle={0.2} />
-          <pointLight position={[-5, -5, 5]} intensity={1.5} color="#ffa092" />
+          <pointLight position={[-5, -5, 5]} intensity={1.5} color="#4169E1" />
           <pointLight position={[0, 0, 8]} intensity={1.0} color="#ffffff" />
           <CameraMetricsUpdater />
 
@@ -373,7 +373,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             maxDistance={40}
             makeDefault
           />
-          <ContactShadows position={[0, -5, 0]} opacity={0.3} scale={15} blur={2.5} far={4} color="#ffa092" />
+          <ContactShadows position={[0, -5, 0]} opacity={0.3} scale={15} blur={2.5} far={4} color="#4169E1" />
         </Canvas>
       </div>
 

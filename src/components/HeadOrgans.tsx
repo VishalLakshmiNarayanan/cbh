@@ -850,7 +850,7 @@ function OrganMesh({ organ, visible, selected, onSelect, onHover, onUnhover, hov
           style={{ pointerEvents: 'none' }}
         >
           <div style={{
-            background: 'rgba(8,8,20,0.94)',
+            background: 'rgba(248,250,252,0.96)',
             border: `1px solid ${organ.color}`,
             borderRadius: '24px',
             padding: '28px 30px',
@@ -866,23 +866,23 @@ function OrganMesh({ organ, visible, selected, onSelect, onHover, onUnhover, hov
             <div style={{ fontSize: '52px', fontWeight: 700, color: organ.color, letterSpacing: '0.3px', marginBottom: '18px' }}>
               {organ.label}
             </div>
-            <div style={{ fontSize: '28px', color: categoryMeta.color, textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '22px' }}>
+            <div style={{ fontSize: '28px', color: '#3558bf', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '22px' }}>
               {categoryMeta.label}
             </div>
             <div style={{
               fontSize: '40px',
               lineHeight: 1.55,
-              color: 'rgba(255,255,255,0.95)',
+              color: 'rgba(2, 6, 23, 0.98)',
               minHeight: '0',
               padding: '26px 28px',
               borderRadius: '20px',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.82)',
+              border: '1px solid rgba(148,163,184,0.22)',
               maxWidth: '780px',
             }}>
               {hoverDescription}
             </div>
-            <div style={{ marginTop: '22px', fontSize: '24px', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.4px' }}>
+            <div style={{ marginTop: '22px', fontSize: '24px', color: 'rgba(51,65,85,0.88)', letterSpacing: '0.4px' }}>
               Hover to preview anatomy details
             </div>
           </div>
