@@ -543,30 +543,116 @@ body {
   display: none;
 }
 
+.print-only-report-header {
+  display: none;
+}
+
+.print-summary-section,
+.print-summary-item,
+.print-transcript-heading {
+  display: none;
+}
+
 @media print {
   /* Hide the UI interactive tools since they aren't useful in a PDF */
-  .control-bar, .chat-input-container, .organ-filter-panel, .btn-text-toggle, .instruction-overlay, .zone-pill, .medbot-voice-agent {
+  .chat-header, .control-bar, .chat-input-container, .organ-filter-panel, .btn-text-toggle, .instruction-overlay, .zone-pill, .medbot-voice-agent, .canvas-overlay-ui, .camera-metrics-panel, .selected-organ-card {
     display: none !important;
   }
   
   /* Save ink by bypassing gradient backgrounds */
   .app-container {
     background: #fff;
-    display: block; /* break the flex row */
+    display: flex;
+    flex-direction: column;
   }
   
   .canvas-container {
-    height: 70vh;
+    min-height: 100vh;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    page-break-before: always;
+    order: 2;
+    break-inside: avoid;
+  }
+
+  .print-only-report-header {
+    display: flex !important;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.5rem 2.25rem 0;
+    margin-bottom: 0.75rem;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .print-report-meta {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .print-report-brand {
+    text-align: right;
+  }
+
+  .print-report-brand h1 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.1;
+    letter-spacing: 0.18em;
+    color: #0f172a;
+  }
+
+  .print-report-brand p {
+    margin: 0.2rem 0 0;
+    font-size: 0.7rem;
+    color: #475569;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .canvas-container > .print-only-report-header {
+    display: none !important;
+  }
+
+  .canvas-container > div {
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvas-container > div:last-child {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+  }
+
+  .canvas-container canvas {
+    display: block !important;
+    margin: 0 auto !important;
+    transform: translateX(-14.5%);
+    transform-origin: center center;
   }
 
   .chat-panel {
+    display: block;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     box-shadow: none;
     border: none;
     width: 100%;
     height: auto;
     position: static;
     margin: 0;
+    order: 1;
+    overflow: visible;
   }
 
   .print-only-diagnosis {
@@ -574,6 +660,51 @@ body {
     padding: 2rem;
     font-size: 1.1rem;
     font-family: serif;
-    page-break-before: always;
+    page-break-before: auto;
+  }
+
+  .print-summary-section {
+    display: block !important;
+    margin: 1.5rem 0 2rem;
+    padding: 1.25rem 1.4rem;
+    background: #f8fafc;
+    border: 1px solid #dbe4f0;
+    border-radius: 14px;
+  }
+
+  .print-summary-section h3,
+  .print-transcript-heading {
+    display: block !important;
+    margin: 0 0 1rem;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #0f172a;
+    letter-spacing: 0.02em;
+  }
+
+  .print-transcript-heading {
+    margin-top: 1.5rem;
+  }
+
+  .print-summary-item {
+    display: block !important;
+    margin-bottom: 1rem;
+  }
+
+  .print-summary-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .print-summary-item strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #1e3a8a;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+  }
+
+  .print-summary-item p {
+    margin: 0;
+    line-height: 1.55;
+    color: #1f2937;
   }
 }
