@@ -295,13 +295,6 @@ export function ChatPanel({
     ];
 
     const aiResponse = await chatWithAssistant(apiMessages);
-    setIsLoading(false); // Stop LLM loading
-    setIsAudioLoading(true); // Start waiting for TTS
-    
-    // Perfect sync: Wait until audio specifically hits speakers BEFORE showing text
-    await playAISpeech(aiResponse);
-    setIsAudioLoading(false); // TTS has started
-
     const aiMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',
@@ -309,6 +302,8 @@ export function ChatPanel({
     };
 
     setMessages((prev) => [...prev, aiMessage]);
+    setIsLoading(false); // Stop LLM loading
+    setIsAudioLoading(false); // Clean up loading states
 
     // Optional heatmap marker on AI response
     if (
@@ -328,7 +323,8 @@ export function ChatPanel({
       }
     }
 
-    setIsLoading(false);
+    // Voice narration happens in background
+    await playAISpeech(aiResponse);
   };
 
   const busy = isLoading || isDiagnosing;
@@ -375,7 +371,7 @@ export function ChatPanel({
               {isDiagnosing
                 ? 'Analyzing marked regions…'
                 : (hoveredZone || hoveredCoords)
-                ? `Hovering: ${hoveredZone || 'Unknown Region'} ${hoveredCoords ? hoveredCoords : ''}`
+                ? `Hovering: ${hoveredZone || 'Unknown Region'}`
                 : 'Awaiting region selection…'}
             </p>
           </div>
