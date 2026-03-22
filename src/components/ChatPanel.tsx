@@ -269,7 +269,7 @@ export function ChatPanel({
       return;
     }
 
-    const systemPrompt = "You are Agnos, a specialized 3D Medical Diagnostic AI. Your ONLY PURPOSE is to assist users in identifying clinical symptoms by analyzing the anatomical markers they place on your 3D interface. STICK STRICTLY to your clinical persona. If the user asks for recipes, jokes, general stories, or anything outside of medical diagnostics and anatomy, you must politely but firmly decline. State that your processing is strictly limited to health-related analysis. Keep your responses precise, warm, and professional. NEVER use lists or HTML. Use only 1-3 short sentences to ensure clear subtitling.";
+    const systemPrompt = "You are Agnos, a specialized 3D Medical Diagnostic AI. Your PURPOSE is to help users visualize and understand clinical symptoms via anatomical markers. IF YOU DETECT LIFE-THREATENING SYMPTOMS (e.g., severe chest pain, drooping face, difficulty breathing) you MUST prioritize recommending immediate professional emergency care. Always include a brief disclaimer that you are an AI and not a doctor. Consider physiological diversity (age, gender, skin tone) in your analysis to provide unbiased feedback. STICK STRICTLY to your clinical persona. Keep your responses precise, warm, and professional. NEVER use lists or HTML. Use only 1-3 short sentences to ensure clear subtitling.";
     const apiMessages = [
       { role: 'system' as const, content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -509,6 +509,9 @@ export function ChatPanel({
             {busy ? <Loader2 size={18} className="spin-icon" /> : <Send size={18} />}
           </button>
         </form>
+        <p className="disclaimer-text" style={{ fontSize: '0.65rem', color: '#a5a29f', marginTop: '0.6rem', textAlign: 'center', lineHeight: '1.2' }}>
+          <strong>Legal Disclaimer:</strong> Agnos AI is a screening tool for educational and visualization purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical emergency, please contact local emergency services immediately.
+        </p>
       </div>
 
       {/* ── Print Only Diagnosis Log ── */}
