@@ -462,6 +462,7 @@ function App() {
   const [isDrawingActive, setIsDrawingActive] = useState(false);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [isInstructionDismissed, setIsInstructionDismissed] = useState(false);
+  const [isInstructionClosing, setIsInstructionClosing] = useState(false);
 
   // ── Draw session refs ────────────────────────────────────────────────
   const currentSession = useRef<DrawSession | null>(null);
@@ -580,7 +581,16 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
     currentSession.current = null;
     setIsDrawingActive(false);
     isStroking.current = false;
+    setIsInstructionClosing(false);
     setIsInstructionDismissed(false);
+  };
+
+  const handleDismissInstruction = () => {
+    setIsInstructionClosing(true);
+    window.setTimeout(() => {
+      setIsInstructionClosing(false);
+      setIsInstructionDismissed(true);
+    }, 280);
   };
 
   // ─── Pointer handlers ─────────────────────────────────────────────────
@@ -710,12 +720,18 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         )}
 
         {/* Instruction overlay */}
-        {decals.length === 0 && !isDrawingActive && !isInstructionDismissed && (
-          <div className={`instruction-overlay ${!isIntroAnimating ? 'instruction-overlay-ready' : ''}`}>
+        {(decals.length === 0 && !isDrawingActive && !isInstructionDismissed) && (
+          <div
+            className={[
+              'instruction-overlay',
+              !isIntroAnimating ? 'instruction-overlay-ready' : '',
+              isInstructionClosing ? 'instruction-overlay-closing' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <button
               type="button"
               className="instruction-overlay-close"
-              onClick={() => setIsInstructionDismissed(true)}
+              onClick={handleDismissInstruction}
               aria-label="Close instructions"
             >
               <X size={16} />

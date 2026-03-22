@@ -475,13 +475,15 @@ body {
 
 .organ-toggle-btn {
   display: flex; align-items: center; gap: 0.4rem;
-  background: #fff; border: 1px solid var(--accent-purple);
-  color: #5a7fe9; padding: 0.55rem 0.95rem; font-size: 0.8rem;
+  background: #fff; border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan); padding: 0.55rem 0.95rem; font-size: 0.8rem;
   border-radius: 8px; cursor: pointer; transition: 0.2s;
-  font-weight: 600; box-shadow: 0 2px 8px rgba(111, 149, 255, 0.05);
+  font-weight: 600; box-shadow: 0 2px 8px rgba(65, 105, 225, 0.05);
 }
 .organ-toggle-btn:hover, .organ-toggle-btn.active {
-  background: var(--accent-purple); color: #fff;
+  background: var(--accent-cyan); color: #fff;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.25);
 }
 
 .organ-filter-btn {
@@ -1023,6 +1025,9 @@ body {
     instructionOverlayEnter 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) forwards,
     fadeOut 2s 5s forwards;
 }
+.instruction-overlay.instruction-overlay-closing {
+  animation: instructionOverlayExit 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 @keyframes instructionOverlayEnter {
   0% {
     opacity: 0;
@@ -1033,6 +1038,18 @@ body {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     filter: blur(0);
+  }
+}
+@keyframes instructionOverlayExit {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+    filter: blur(8px);
   }
 }
 @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
