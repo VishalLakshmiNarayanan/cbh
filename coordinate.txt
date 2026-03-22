@@ -225,3 +225,152 @@ Left Cervical / Trapezius Neck Back of neck
 Scale: 40.00
 Rot: [X:180.0 deg Y:-4.4 deg Z:180.0 deg]
 Position: [X: 0.73 Y:-0.34 Z:-0.99]
+
+Glabella
+Scale: 40.00
+Rot: [X:-5.0 Y:-0.9 Z:-0.1]
+Position: [X:-0.12 Y:1.89 Z:2.13]
+
+Left Supraorbital Ridge
+Scale: 40.00
+Rot: [X:-5.0 Y:-0.9 Z:-0.1]
+Position: [X:-0.83 Y:2.01 Z:2.01]
+
+Right Supraorbital Ridge
+Scale: 40.00
+Rot: [X:-5.0 Y:-0.9 Z:-0.1]
+Position: [X:0.70 Y:0.93 Z:1.89]
+
+Left Lateral Orbit
+Scale: 40.00
+Rot: [X:-5.4 Y:-0.9 Z:-0.1]
+Position: [X:-0.96 Y:2.09 Z:1.96]
+
+Right Lateral Orbit
+Scale: 40.00
+Rot: [X:-5.4 Y:-0.9 Z:-0.1]
+Position: [X:0.68 Y:2.09 Z:1.98]
+
+Left Zygomatic arch
+Scale: 40.00
+Rot : [X:-3.3 Y:-49.2 Z:-2.5]
+Position: [X:-1.47 Y:1.32 Z:0.92]
+
+Right Zygomatic arch
+Scale: 40.00
+Rot : [X:-38.8 Y:70.0 Z:37.1]
+Position: [X:1.24 Y:1.41 Z:0.94]
+
+Mid Occipital / Inion
+Scale: 40.00
+Rot: [X:171.2 Y:-3.0 Z:-179.5]
+Position: [X=-0.05 Y:0.75 Z:-1.48]
+
+Right Posterior Parietal
+Scale: 40.00
+Rot: [X:-55.8 Y:79.4 Z:55.4]
+Position: [X:1.43 Y:2.18 Z:0.16]
+
+Left Posterior Parietal
+Scale: 40.00
+Rot: [X:-97.2 Y:-81.2 Z:-97.3]
+Position: [X:-1.60 Y:2.15 Z:0.09]
+
+Right Mastoid Region
+Scale: 40.00
+Rot: [X:-177.3 Y:57.5 Z:177.7]
+Position: [X:1.26 Y:0.81 Z:-0.08]
+
+Left Mastoid Region
+Scale: 40.00
+Rot: [X:-175.8 Y:-52.4 Z:-176.7]
+Position: [-1.45 Y:0.90 Z:-0.14]
+
+Central Forehead
+Scale: 40.00
+Rot: [X:-6.5 Y:-0.7 Z:-0.1]
+Position: [X:-0.11 Y:2.45 Z:2.12]
+
+Left Forehead
+Scale: 40.00
+Rot: [X:-6.5 Y:-0.7 Z:-0.1]
+Position: [X:-0.80 Y:2.56 Z:2.01]
+
+Right Forehead
+Scale: 40.00
+Rot: [X:-6.5 Y:-0.7 Z:-0.1]
+Position: [X:0.86 Y:2.46 Z:1.70]
+
+Left Temple
+Scale: 40.00
+Rot: [X:-9.4 Y:-2.2 Z:-0.4]
+Position: [X: -1.40 Y:1.69 Z:1.22]
+
+Right Temple
+Scale: 40.00
+Rot: [X:-9.4 Y:-2.2 Z:-0.4]
+Position: [X:1.17 Y:1.83 Z:1.17]
+
+Left Temporal Fossa
+Scale: 40.00
+Rot: [X:-51.0 Y:-84.8 Z:-50.9]
+Position: [X:-1.62 Y:2.24 Z:0.06]
+
+Right Temporal Fossa
+Scale: 40.00
+Rot: [X:-33.9 Y:86.7 Z:33.9]
+Position: [X:1.44 Y:2.26 Z:0.19]
+
+Occipital(Upper)
+Scale: 40.00
+Rot: [X:-172.3 Y:-1.9 z:-179.7]
+Position: [X:-0.04 Y:2.36 Z:-1.97]
+
+Left Occipital
+Scale: 40.00
+Rot: [X:-172.3 Y:-1.9 z:-179.7]
+Position: [X:-0.84 Y:1.77 Z:-1.71]
+
+Right Occipital
+Scale: 40.00
+Rot: [X:-172.3 Y:-1.9 z:-179.7]
+Position: [X:0.91 Y:1.84 Z:-1.63]
+
+Left Mastoid/Temporal Bone(Same as Left Mastoid Region)
+
+Right Mastoid/Temporal Bone(Same as Right Mastoid Region)
+
+Crown/vertex
+Scale: 40.00
+Rot: [X:-145.5 Y:5.0 Z:176.6]
+Position: [X:-0.03 Y:3.03 Z:-1.76]
+
+Left Parietal Scalp
+Scale: 40.00
+Rot: [X:-9.4 Y:-2.2 Z:-0.4]
+Position: [X:-1.13 Y:3.00 Z:1.43]
+
+Right Parietal Scalp
+Scale: 40.00
+Rot: [X:-9.4 Y:-2.2 Z:-0.4]
+Position: [X:.78 Y:2.90 Z:1.68]
+
+Left Temporal Scalp(Same as Left Mastoid Region)
+
+Right Temporal Scalp(Same as Right Mastoid Region)
+
+Posterior Vertex/Occiput(Same as Mid Occipital / Inion)
+
+Left Occipital Scalp
+Scale: 40.00
+Rot: [X:-170.1 Y:13.9 Z:177.6]
+Position: [X:1.05 Y:1.16 Z:-1.21]
+
+Right Occipital Scalp
+Scale: 40.00
+Rot: [X:-164.6 Y:-21.3 Z:-174.3]
+Position: [X:-1.03 Y:1.04 Z:-1.20]
+
+Left Periorbital (Same as Left Supraorbital Ridge)
+
+Right Periorbital (Same as Right Supraorbital Ridge)
