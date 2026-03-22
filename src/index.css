@@ -1075,11 +1075,19 @@ body {
     display: none !important;
   }
   
+  /* MINIMAL FIX for multi-page cutoff: reset body overflow */
+  html, body, #root {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
   /* Save ink by bypassing gradient backgrounds */
   .app-container {
     background: #fff;
     display: flex;
     flex-direction: column;
+    height: auto !important;
+    overflow: visible !important;
   }
   
   .canvas-container {
@@ -1224,3 +1232,4 @@ body {
     color: #1f2937;
   }
 }
+
