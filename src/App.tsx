@@ -99,8 +99,9 @@ function App() {
   const [lockedCoords, setLockedCoords] = useState<string | null>(null);
   const [activePoint, setActivePoint] = useState<{ point: Point3D; normal: Point3D } | null>(null);
   
-  // ── Show Test 3D toggle ──
+  // ── Visualization toggles ───────────────────────────────────────────
   const [showTest3D, setShowTest3D] = useState(false);
+  const [showMuscles, setShowMuscles] = useState(false);
 
   // ── Draw mode state ───────────────────────────────────────────────────
   const [isDrawMode, setIsDrawMode] = useState(true);
@@ -324,7 +325,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         )}
 
         {/* ── 3D Canvas ────────────────────────────────────────────────── */}
-        <Canvas camera={{ position: [0, 0, 12], fov: 35 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
+        <Canvas camera={{ position: [0, 0, 27.26], fov: 35 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
           <ambientLight intensity={1.2} />
           <spotLight position={[5, 10, 5]} intensity={2.0} penumbra={1} castShadow angle={0.2} />
           <pointLight position={[-5, -5, 5]} intensity={1.5} color="#ffa092" />
@@ -344,6 +345,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             isDrawMode={isDrawMode}
             isDrawingActive={isDrawingActive}
             showTest3D={showTest3D}
+            showMuscles={showMuscles}
           />
 
           {showTest3D && (
@@ -388,6 +390,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         hasDecals={decals.length > 0}
         showTest3D={showTest3D}
         setShowTest3D={setShowTest3D}
+        showMuscles={showMuscles}
+        setShowMuscles={setShowMuscles}
       />
     </div>
   );

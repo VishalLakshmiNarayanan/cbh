@@ -4,6 +4,8 @@ import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
 import { playAISpeech, initAudio } from '../lib/elevenlabs';
 
+const LIVEAVATAR_EMBED_ID = "fa777b65-339c-423f-9fa0-b9e06bc7c174";
+
 interface ChatPanelProps {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
@@ -24,7 +26,23 @@ interface ChatPanelProps {
   hasDecals: boolean;
   
   showTest3D: boolean;
-  setShowTest3D: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowTest3D: (val: boolean) => void;
+  showMuscles: boolean;
+  setShowMuscles: (val: boolean) => void;
+}
+
+function LiveAvatarBot() {
+  return (
+    <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '3px solid var(--accent-cyan)', background: '#000' }}>
+      <iframe 
+        src={`https://embed.liveavatar.com/v1/${LIVEAVATAR_EMBED_ID}`}
+        allow="microphone; camera; display-capture; autoplay; encrypted-media; fullscreen"
+        style={{ width: '100%', height: '100%', border: 'none', objectFit: 'cover' }} 
+        title="LiveAvatar Interaction"
+      />
+      <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'var(--accent-cyan)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', color: '#fff' }}>AGNOS LIVE</div>
+    </div>
+  );
 }
 
 function RunningSubtitle({ text }: { text: string }) {
@@ -92,10 +110,14 @@ export function ChatPanel({
   
   showTest3D,
   setShowTest3D,
+  showMuscles,
+  setShowMuscles,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [mascotImg, setMascotImg] = useState('/medbot.png');
   const [isListening, setIsListening] = useState(false);
   const isListeningRef = useRef(false);
   const recognitionRef = useRef<any>(null);
@@ -156,6 +178,42 @@ export function ChatPanel({
       };
     }
   }, []);
+
+  // --- Mascot Animation Logic ---
+  useEffect(() => {
+    const handleStart = () => setIsAudioPlaying(true);
+    const handleEnd = () => setIsAudioPlaying(false);
+    window.addEventListener('agnos-audio-start', handleStart);
+    window.addEventListener('agnos-audio-end', handleEnd);
+    return () => {
+      window.removeEventListener('agnos-audio-start', handleStart);
+      window.removeEventListener('agnos-audio-end', handleEnd);
+    };
+  }, []);
+
+  useEffect(() => {
+    let interval: any;
+    if (isAudioPlaying) {
+      // Cycle through talking images
+      const images = ['/medbot_talking_1.png', '/medbot_talking_2.png', '/medbot_active.png', '/medbot.png'];
+      let idx = 0;
+      interval = setInterval(() => {
+        setMascotImg(images[idx % images.length]);
+        idx++;
+      }, 250);
+    } else if (isDiagnosing || isLoading || isAudioLoading) {
+      // Show thinking or neutral-thinking cycle
+      const images = ['/medbot_thinking.png', '/medbot.png'];
+      let idx = 0;
+      interval = setInterval(() => {
+        setMascotImg(images[idx % images.length]);
+        idx++;
+      }, 600);
+    } else {
+      setMascotImg('/medbot.png');
+    }
+    return () => clearInterval(interval);
+  }, [isAudioPlaying, isDiagnosing, isLoading, isAudioLoading]);
 
   const toggleListen = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -255,7 +313,7 @@ export function ChatPanel({
       <div className="chat-header">
         <div className="chat-header-title">
           <div className="medbot-avatar-wrap">
-            <img src="/medbot.png" alt="AGNOS AI Mascot" className="medbot-avatar" />
+            <img src={mascotImg} alt="AGNOS AI Mascot" className="medbot-avatar" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -278,6 +336,24 @@ export function ChatPanel({
           >
             <Download size={18} />
           </button>
+
+            <button 
+              className={`tool-btn ${showMuscles ? 'active' : ''}`}
+              onClick={() => setShowMuscles(!showMuscles)}
+              title="Toggle Muscle Highlights"
+              style={{ padding: '0.4rem', borderRadius: '8px', background: showMuscles ? 'rgba(85, 255, 0, 0.2)' : 'transparent', border: '1px solid var(--accent-cyan)' }}
+            >
+              <Layers size={18} color={showMuscles ? '#55ff00' : 'var(--accent-cyan)'} />
+            </button>
+
+            <button 
+              className={`tool-btn ${showTest3D ? 'active' : ''}`}
+              onClick={() => setShowTest3D(!showTest3D)}
+              title="Toggle Transparency"
+              style={{ padding: '0.4rem', borderRadius: '8px', background: showTest3D ? 'rgba(0, 255, 255, 0.2)' : 'transparent', border: '1px solid var(--accent-cyan)' }}
+            >
+              <Eye size={18} color="var(--accent-cyan)" />
+            </button>
         </div>
 
         {/* Control Bar integrated into Chat Header */}
@@ -301,7 +377,7 @@ export function ChatPanel({
             <div className="organ-toggle-group">
               <button
                 className={`organ-toggle-btn ${showTest3D ? 'active' : ''}`}
-                onClick={() => setShowTest3D((v) => !v)}
+                onClick={() => setShowTest3D(!showTest3D)}
                 title="Test 3D Mode — Opaque head mesh will turn transparent"
               >
                 <Layers size={14} /> Test 3D
@@ -348,9 +424,9 @@ export function ChatPanel({
       </div>
 
       <div className="medbot-voice-agent">
-        <div className="voice-agent-avatar-wrap">
-          <img src="/medbot.png" alt="Agnos Mascot" />
-          {busy && <div className="voice-agent-pulse" />}
+        <div className="voice-agent-avatar-wrap" style={{ background: 'radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%)', border: 'none', boxShadow: 'none' }}>
+          <LiveAvatarBot />
+          {(busy || isAudioPlaying) && <div className="voice-agent-pulse" style={{ scale: '1.4' }} />}
         </div>
         
         <div className="voice-agent-subtitle">
