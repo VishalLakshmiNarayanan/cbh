@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, Download, Mic } from 'lucide-react';
 import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
-import { playAISpeech } from '../lib/elevenlabs';
+import { playAISpeech, initAudio } from '../lib/elevenlabs';
 
 interface ChatPanelProps {
   messages: Message[];
@@ -181,6 +181,9 @@ export function ChatPanel({
     e.preventDefault();
     if (!input.trim() || isLoading || isDiagnosing) return;
 
+    // Synchronously initialize the audio context on interaction locally
+    initAudio();
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -199,7 +202,9 @@ export function ChatPanel({
     ];
 
     const aiResponse = await chatWithAssistant(apiMessages);
-    playAISpeech(aiResponse);
+    
+    // Perfect sync: Wait until audio specifically hits speakers BEFORE showing text
+    await playAISpeech(aiResponse);
 
     const aiMessage: Message = {
       id: (Date.now() + 1).toString(),

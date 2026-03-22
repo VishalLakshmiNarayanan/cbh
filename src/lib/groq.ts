@@ -38,3 +38,4 @@ CRITICAL: Respond in plain text ONLY. Do NOT use markdown formatting, asterisks,
     return "Error communicating with the diagnostic engine.";
   }
 };
+
