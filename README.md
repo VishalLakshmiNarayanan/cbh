@@ -38,7 +38,7 @@ AGNOS AI is built with a commitment to responsible AI deployment and patient saf
 ## Technical Architecture
 
 *   **Logic & Rendering**: React with Three.js (via React Three Fiber and Drei) for high-performance 3D visualization and decal mapping.
-*   **Natural Language Processing**: Groq-hosted Llama-3 (or optimized LLMs) for low-latency diagnostic reasoning.
+*   **Natural Language Processing**: Claude-hosted Llama-3 (or optimized LLMs) for low-latency diagnostic reasoning.
 *   **Human-Computer Interaction**: Web Speech API for seamless browser-native text-to-speech output, ensuring high availability and zero-cost accessibility.
 *   **Data Export**: PDF generation module for session summaries, allowing users to take their mapped data to a healthcare provider.
 
