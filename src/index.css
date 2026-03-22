@@ -1234,13 +1234,13 @@ body {
 }
 
 
+
 /* Guided Tour System */
 .tour-highlight {
   z-index: 1001 !important; /* Above the overlay (1000) but below the caption box (1002) */
   position: relative !important;
   box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.4), 0 0 0 12px var(--accent-cyan), 0 0 40px rgba(65, 105, 225, 0.8) !important;
   pointer-events: none;
-  /* Removed background: white to avoid covering transparent elements */
 }
 
 .tour-parent-lift {
@@ -1321,4 +1321,160 @@ body {
   font-size: 0.85rem;
   cursor: pointer;
   text-decoration: underline;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .app-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    background-attachment: fixed;
+  }
+
+  .canvas-container {
+    height: 48vh;
+    width: 100%;
+    flex: none;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 80%);
+  }
+
+  .canvas-overlay-ui {
+    top: 1rem;
+    left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .app-container.intro-active .canvas-overlay-ui {
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .app-container.intro-active.intro-title-docked .canvas-overlay-ui {
+    top: 1.25rem;
+    left: 1.25rem;
+    transform: translate(0, 0) scale(0.75);
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    letter-spacing: 0.1em;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+    white-space: normal;
+    max-width: 200px;
+  }
+
+  .chat-panel-shell {
+    width: 100%;
+    flex: none;
+    padding: 0;
+    transform: none;
+    opacity: 1;
+    z-index: 10;
+  }
+
+  .app-container.intro-active .chat-panel-shell {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+
+  .app-container.intro-active.intro-layout-assembled .chat-panel-shell {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .chat-panel {
+    width: 100%;
+    margin: 0;
+    height: auto;
+    min-height: 52vh;
+    border-radius: 32px 32px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+  }
+
+  .chat-header {
+    padding: 1.25rem 1.25rem 1rem;
+    border-radius: 32px 32px 0 0;
+  }
+
+  .control-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .control-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .draw-controls, .organ-toggle-group {
+    flex-shrink: 0;
+  }
+
+  .medbot-voice-agent {
+    padding: 1.5rem 1rem;
+    min-height: 200px;
+  }
+
+  .voice-agent-avatar-wrap {
+    width: 120px;
+    height: 120px;
+  }
+
+  .voice-agent-subtitle {
+     font-size: 0.95rem;
+  }
+
+  .chat-input-container {
+    padding: 1rem;
+    background: #fff;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    position: sticky;
+    bottom: 0;
+  }
+
+  .chat-header-title h2 {
+    font-size: 1.1rem !important;
+  }
+
+  /* Tour System Mobile Adjustments */
+  .tour-caption-box {
+    width: 92%;
+    bottom: 15%;
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .tour-caption-box h4 {
+    font-size: 1rem;
+  }
+
+  .tour-caption-box p {
+    font-size: 0.85rem;
+  }
+
+  /* Sticky layout adjustment */
+  .app-container:not(.intro-active) .canvas-container {
+    height: 48vh;
+  }
 }
