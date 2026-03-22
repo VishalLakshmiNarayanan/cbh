@@ -29,6 +29,24 @@ interface ChatPanelProps {
   setShowMuscles: (val: boolean) => void;
 }
 
+function Tooltip({
+  label,
+  children,
+  className = '',
+  placement = 'top',
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  placement?: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end';
+}) {
+  return (
+    <span className={`ui-tooltip ui-tooltip-${placement} ${className}`.trim()} data-tooltip={label}>
+      {children}
+    </span>
+  );
+}
+
 function RunningSubtitle({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState('');
   const [visible, setVisible] = useState(true);
@@ -361,32 +379,36 @@ export function ChatPanel({
                 : 'Awaiting region selection…'}
             </p>
           </div>
-          <button
-            className="btn-text-toggle"
-            onClick={() => window.print()}
-            title="Export Chat to PDF"
-            style={{ padding: '0.5rem', background: 'rgba(65, 105, 225, 0.1)', borderRadius: '8px' }}
-          >
-            <Download size={18} />
-          </button>
+          <Tooltip label="Export chat to PDF" placement="bottom-end">
+            <button
+              className="btn-text-toggle"
+              onClick={() => window.print()}
+              aria-label="Export chat to PDF"
+              style={{ padding: '0.5rem', background: 'rgba(65, 105, 225, 0.1)', borderRadius: '8px' }}
+            >
+              <Download size={18} />
+            </button>
+          </Tooltip>
 
+          <Tooltip label="Toggle muscle highlights" placement="bottom-end">
             <button 
               className={`tool-btn ${showMuscles ? 'active' : ''}`}
               onClick={() => setShowMuscles(!showMuscles)}
-              title="Toggle Muscle Highlights"
-              style={{ padding: '0.4rem', borderRadius: '8px', background: showMuscles ? 'rgba(85, 255, 0, 0.2)' : 'transparent', border: '1px solid var(--accent-cyan)' }}
+              aria-label="Toggle muscle highlights"
             >
-              <Layers size={18} color={showMuscles ? '#55ff00' : 'var(--accent-cyan)'} />
+              <Layers size={18} />
             </button>
+          </Tooltip>
 
+          <Tooltip label="Toggle transparency" placement="bottom-end">
             <button 
               className={`tool-btn ${showTest3D ? 'active' : ''}`}
               onClick={() => setShowTest3D(!showTest3D)}
-              title="Toggle Transparency"
-              style={{ padding: '0.4rem', borderRadius: '8px', background: showTest3D ? 'rgba(0, 255, 255, 0.2)' : 'transparent', border: '1px solid var(--accent-cyan)' }}
+              aria-label="Toggle transparency"
             >
-              <Eye size={18} color="var(--accent-cyan)" />
+              <Eye size={18} />
             </button>
+          </Tooltip>
         </div>
 
         {/* Control Bar integrated into Chat Header */}
@@ -408,13 +430,15 @@ export function ChatPanel({
             </div>
 
             <div className="organ-toggle-group">
-              <button
-                className={`organ-toggle-btn ${showTest3D ? 'active' : ''}`}
-                onClick={() => setShowTest3D(!showTest3D)}
-                title="Test 3D Mode — Opaque head mesh will turn transparent"
-              >
-                <Layers size={14} /> Test 3D
-              </button>
+              <Tooltip label="Test 3D mode turns the head mesh transparent" className="ui-tooltip-block" placement="top">
+                <button
+                  className={`organ-toggle-btn ${showTest3D ? 'active' : ''}`}
+                  onClick={() => setShowTest3D(!showTest3D)}
+                  aria-label="Test 3D mode turns the head mesh transparent"
+                >
+                  <Layers size={14} /> Test 3D
+                </button>
+              </Tooltip>
               {/* Note: showOrgans / anatomy toggle disabled per user request for now */}
             </div>
           </div>
@@ -496,15 +520,17 @@ export function ChatPanel({
             }
             disabled={busy}
           />
-          <button 
-            type="button" 
-            className={`chat-mic ${isListening ? 'listening' : ''}`}
-            onClick={toggleListen}
-            disabled={busy || !recognitionRef.current}
-            title={isListening ? "Click to stop dictation" : "Dictate with Microphone"}
-          >
-            {isListening ? <StopCircle size={18} /> : <Mic size={18} />}
-          </button>
+          <Tooltip label={isListening ? 'Stop dictation' : 'Dictate with microphone'} placement="top">
+            <button 
+              type="button" 
+              className={`chat-mic ${isListening ? 'listening' : ''}`}
+              onClick={toggleListen}
+              disabled={busy || !recognitionRef.current}
+              aria-label={isListening ? 'Stop dictation' : 'Dictate with microphone'}
+            >
+              {isListening ? <StopCircle size={18} /> : <Mic size={18} />}
+            </button>
+          </Tooltip>
           <button type="submit" className="chat-submit" disabled={busy || !input.trim()}>
             {busy ? <Loader2 size={18} className="spin-icon" /> : <Send size={18} />}
           </button>

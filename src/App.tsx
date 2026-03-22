@@ -8,7 +8,7 @@ import { ChatPanel } from './components/ChatPanel';
 import type { DecalData, Message, Point3D } from './types';
 import { chatWithAssistant } from './lib/groq';
 import { playAISpeech, initAudio } from './lib/elevenlabs';
-import { MapPin } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 
 type DrawSession = {
   decalIds: string[];
@@ -461,6 +461,7 @@ function App() {
   const [isDrawMode, setIsDrawMode] = useState(true);
   const [isDrawingActive, setIsDrawingActive] = useState(false);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [isInstructionDismissed, setIsInstructionDismissed] = useState(false);
 
   // ── Draw session refs ────────────────────────────────────────────────
   const currentSession = useRef<DrawSession | null>(null);
@@ -579,6 +580,7 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
     currentSession.current = null;
     setIsDrawingActive(false);
     isStroking.current = false;
+    setIsInstructionDismissed(false);
   };
 
   // ─── Pointer handlers ─────────────────────────────────────────────────
@@ -708,8 +710,16 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         )}
 
         {/* Instruction overlay */}
-        {decals.length === 0 && !isDrawingActive && (
-          <div className="instruction-overlay">
+        {decals.length === 0 && !isDrawingActive && !isInstructionDismissed && (
+          <div className={`instruction-overlay ${!isIntroAnimating ? 'instruction-overlay-ready' : ''}`}>
+            <button
+              type="button"
+              className="instruction-overlay-close"
+              onClick={() => setIsInstructionDismissed(true)}
+              aria-label="Close instructions"
+            >
+              <X size={16} />
+            </button>
             <h3>Select a Region to Diagnose</h3>
             <p>
               Switch to <strong>Paint</strong> mode → <strong>Start Draw</strong> → drag over the affected area.
