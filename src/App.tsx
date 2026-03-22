@@ -291,12 +291,12 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         {(hoveredZone || hoveredCoords || lockedCoords) && (
           <div className="zone-pill" style={{ flexDirection: 'column', gap: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MapPin size={12} color={lockedCoords ? '#4169E1' : 'var(--accent-cyan)'} />
+              <MapPin size={12} color={lockedCoords ? '#ff3624' : 'var(--accent-cyan)'} />
               <span style={{ fontWeight: 600 }}>{hoveredZone || 'Unknown Region'}</span>
               {hoveredCoords && !lockedCoords && <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{hoveredCoords}</span>}
             </div>
             {lockedCoords && (
-              <div style={{ fontSize: '0.75rem', color: '#4169E1', fontWeight: 700, background: 'rgba(65, 105, 225, 0.12)', padding: '2px 8px', borderRadius: '4px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#ff3624', fontWeight: 700, background: 'rgba(255, 54, 36, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
                 LOCKED: {lockedCoords}
               </div>
             )}

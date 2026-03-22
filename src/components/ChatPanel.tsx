@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download, Mic } from 'lucide-react';
+import { Send, Loader2, Brush, Eye, Play, StopCircle, Trash2, Layers, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import type { Message, DecalData, Point3D } from '../types';
 import { chatWithAssistant } from '../lib/groq';
 import { playAISpeech } from '../lib/elevenlabs';
@@ -397,7 +397,7 @@ export function ChatPanel({
           ) : isLoading ? (
             <p className="thinking-text">MedBot is thinking...</p>
           ) : latestAIMessage ? (
-            <RunningSubtitle text={latestAIMessage.content} />
+            <p dangerouslySetInnerHTML={{ __html: latestAIMessage.content.replace(/\n/g, '<br/>') }} />
           ) : (
             <p className="intro-text">Hello! I am MedBot. Paint the affected region on the 3D model, and I will analyze it for you.</p>
           )}

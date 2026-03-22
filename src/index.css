@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-color: #ffffff;
+  --bg-color: #fef9f7;
   --text-primary: #111111; 
   --text-secondary: #6e6b68;
-  --accent-cyan: #4169E1;
-  --accent-purple: #4169E1;
+  --accent-cyan: #ff6b52;  
+  --accent-purple: #ff9d82; 
   
   --panel-bg: rgba(255, 255, 255, 0.75);
   --panel-blur: blur(28px);
@@ -44,23 +44,6 @@ body {
   position: relative;
   isolation: isolate;
   background-color: var(--bg-color);
-}
-
-.app-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    #ffffff;
-  background-image:
-    radial-gradient(circle at top center, rgba(59, 130, 246, 0.5), transparent 70%);
-  filter: none;
-}
-
-.app-container > * {
-  position: relative;
-  z-index: 1;
 }
 
 .canvas-container {
@@ -135,7 +118,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--accent-cyan);
-  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.24);
+  box-shadow: 0 4px 12px rgba(255, 107, 82, 0.3);
   background: #fff;
   flex-shrink: 0;
 }
@@ -345,27 +328,17 @@ body {
 }
 
 .voice-agent-avatar-wrap {
-<<<<<<< HEAD
-  width: 140px;
-  height: 140px;
-  position: relative;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-=======
   width: 120px;
   height: 120px;
   border-radius: 50%;
   position: relative;
   background: #fff;
   border: 4px solid var(--accent-cyan);
-  box-shadow: 0 8px 32px rgba(65, 105, 225, 0.2);
+  box-shadow: 0 8px 32px rgba(255, 107, 82, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
->>>>>>> 618c298 (feat:deployment build fixes)
   z-index: 2;
   flex-shrink: 0;
 }
@@ -373,20 +346,12 @@ body {
 .voice-agent-avatar-wrap img {
   width: 100%;
   height: 100%;
-<<<<<<< HEAD
-  object-fit: contain;
-=======
   object-fit: cover;
->>>>>>> 618c298 (feat:deployment build fixes)
 }
 
 .voice-agent-pulse {
   position: absolute;
-<<<<<<< HEAD
-  top: 10%; left: 10%; right: 10%; bottom: 10%;
-=======
   top: 0; left: 0; right: 0; bottom: 0;
->>>>>>> 618c298 (feat:deployment build fixes)
   border-radius: 50%;
   border: 4px solid var(--accent-cyan);
   animation: radarPulse 1.5s infinite ease-out;
@@ -404,23 +369,11 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   max-width: 90%;
-<<<<<<< HEAD
-  min-height: 5.5rem; /* Locks physical UI space exactly for ~2 rows */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.8);
-  padding: 1rem 1.5rem;
-  border-radius: 16px;
-  border: 2px solid var(--accent-cyan);
-  box-shadow: 0 4px 20px rgba(255, 107, 82, 0.15), inset 0 0 0 1px rgba(255, 107, 82, 0.1);
-=======
   background: rgba(255,255,255,0.6);
   padding: 1rem 1.5rem;
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.03);
   border: 1px solid rgba(255,255,255,0.8);
->>>>>>> 618c298 (feat:deployment build fixes)
 }
 
 .thinking-text {
@@ -535,21 +488,6 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.selected-organ-card {
-  position: absolute;
-  top: 7.5rem;
-  left: 3rem;
-  z-index: 20;
-  max-width: 26rem;
-  padding: 1rem 1.15rem;
-  border-radius: 18px;
-  background: rgba(15, 23, 42, 0.86);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
-  color: rgba(248, 250, 252, 0.94);
-  backdrop-filter: blur(14px);
-}
-
 .typing-dots { display: flex; gap: 4px; }
 .typing-dots span {
   width: 6px; height: 6px; background-color: var(--accent-cyan); border-radius: 50%;
@@ -573,47 +511,9 @@ body {
 @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 .instruction-overlay h3 { color: var(--accent-cyan); margin-bottom: 0.5rem; font-size: 1.4rem; font-weight: 700; }
 
-<<<<<<< HEAD
-.print-only-diagnosis {
-  display: none;
-}
-
-=======
->>>>>>> 618c298 (feat:deployment build fixes)
 @media print {
   /* Hide the UI interactive tools since they aren't useful in a PDF */
   .control-bar, .chat-input-container, .organ-filter-panel, .btn-text-toggle, .instruction-overlay, .zone-pill, .medbot-voice-agent {
     display: none !important;
   }
-<<<<<<< HEAD
-  
-  /* Save ink by bypassing gradient backgrounds */
-  .app-container {
-    background: #fff;
-    display: block; /* break the flex row */
-  }
-  
-  .canvas-container {
-    height: 70vh;
-    width: 100%;
-  }
-
-  .chat-panel {
-    box-shadow: none;
-    border: none;
-    width: 100%;
-    height: auto;
-    position: static;
-    margin: 0;
-  }
-
-  .print-only-diagnosis {
-    display: block !important;
-    padding: 2rem;
-    font-size: 1.1rem;
-    font-family: serif;
-    page-break-before: always;
-  }
-=======
->>>>>>> 618c298 (feat:deployment build fixes)
 }
