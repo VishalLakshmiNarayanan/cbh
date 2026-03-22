@@ -32,6 +32,8 @@ interface ChatPanelProps {
   toggleCategory: (c: OrganCategory) => void;
   toggleAll: () => void;
   allCategories: OrganCategory[];
+  showTest3D: boolean;
+  setShowTest3D: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function RunningSubtitle({ text }: { text: string }) {
@@ -105,6 +107,8 @@ export function ChatPanel({
   toggleCategory,
   toggleAll,
   allCategories,
+  showTest3D,
+  setShowTest3D,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -297,12 +301,13 @@ export function ChatPanel({
 
             <div className="organ-toggle-group">
               <button
-                className={`organ-toggle-btn ${showOrgans ? 'active' : ''}`}
-                onClick={() => { setShowOrgans((v) => !v); setOrganPanelOpen(showOrgans ? false : organPanelOpen); }}
-                title="Show / hide internal anatomy"
+                className={`organ-toggle-btn ${showTest3D ? 'active' : ''}`}
+                onClick={() => setShowTest3D((v) => !v)}
+                title="Test 3D Mode — Opaque head mesh will turn transparent"
               >
-                <Layers size={14} /> Anatomy {showOrgans ? 'ON' : 'OFF'}
+                <Layers size={14} /> Test 3D
               </button>
+              {/* Note: showOrgans / anatomy toggle disabled per user request for now */}
               {showOrgans && (
                 <button
                   className="organ-filter-btn"

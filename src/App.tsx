@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
 import { FaceModel } from './components/FaceModel';
 import { ChatPanel } from './components/ChatPanel';
 import { HeadOrgans, CATEGORY_META, type OrganCategory } from './components/HeadOrgans';
@@ -34,6 +34,63 @@ export function CameraMetricsUpdater() {
 
 const ALL_CATEGORIES = Object.keys(CATEGORY_META) as OrganCategory[];
 
+function TestBrownEyeballs({ onClick }: { onClick: (name: string) => void }) {
+  const { scene } = useGLTF('/brown_eyeball_free.glb');
+  
+  // Manually clone the scene tree so we can safely render multiple distinct instances symmetrically
+  const rightEye = useRef(scene.clone(true)).current;
+  const leftEye = useRef(scene.clone(true)).current;
+
+  return (
+    <group onPointerDown={(e) => { e.stopPropagation(); onClick('Eyeballs'); }}>
+      <primitive object={rightEye} position={[-0.70, 1.68, 1.95]} scale={0.2} />
+      <primitive object={leftEye} position={[0.57, 1.65, 1.93]} scale={0.2} />
+    </group>
+  );
+}
+
+function TestBrain({ onClick }: { onClick: (name: string) => void }) {
+  const { scene } = useGLTF('/human-brain.glb');
+  const brain = useRef(scene.clone(true)).current;
+  return (
+    <primitive 
+      object={brain} 
+      position={[-0.10, 2.35, 0.15]} 
+      rotation={[0, Math.PI * 1.5, 0]} 
+      scale={1.55} 
+      onPointerDown={(e: any) => { e.stopPropagation(); onClick('Brain'); }}
+    />
+  );
+}
+
+function TestLarynx({ onClick }: { onClick: (name: string) => void }) {
+  const { scene } = useGLTF('/anatomy_of_the_larynx.glb');
+  const larynx = useRef(scene.clone(true)).current;
+  return (
+    <primitive 
+      object={larynx} 
+      position={[0, -1.75, -0.85]} 
+      rotation={[0, 0, 0]} 
+      scale={0.02} 
+      onPointerDown={(e: any) => { e.stopPropagation(); onClick('Larynx'); }}
+    />
+  );
+}
+
+function TestTongue({ onClick }: { onClick: (name: string) => void }) {
+  const { scene } = useGLTF('/tongue.glb');
+  const tongue = useRef(scene.clone(true)).current;
+  return (
+    <primitive 
+      object={tongue} 
+      position={[-0.09, 0.15, 0.55]} 
+      rotation={[-6.3, 0.4, 0]} 
+      scale={0.015} 
+      onPointerDown={(e: any) => { e.stopPropagation(); onClick('Tongue'); }}
+    />
+  );
+}
+
 function App() {
   const [decals, setDecals] = useState<DecalData[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -41,6 +98,9 @@ function App() {
   const [hoveredCoords, setHoveredCoords] = useState<string | null>(null);
   const [lockedCoords, setLockedCoords] = useState<string | null>(null);
   const [activePoint, setActivePoint] = useState<{ point: Point3D; normal: Point3D } | null>(null);
+  
+  // ── Show Test 3D toggle ──
+  const [showTest3D, setShowTest3D] = useState(false);
 
   // ── Draw mode state ───────────────────────────────────────────────────
   const [isDrawMode, setIsDrawMode] = useState(true);
@@ -79,6 +139,42 @@ function App() {
   const allOn = activeCategories.size === ALL_CATEGORIES.length;
   const toggleAll = () =>
     setActiveCategories(allOn ? new Set() : new Set(ALL_CATEGORIES));
+
+  const handleOrganClick = async (organName: string) => {
+    if (isDiagnosing) return;
+    
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        role: 'user',
+        content: `[Patient Interaction: Inspected ${organName} 3D structure]`,
+      },
+    ]);
+    setIsDiagnosing(true);
+
+    const prompt = `System Instructions for MedBot:
+The patient has specifically clicked on the ${organName} 3D anatomical model for a detailed inspection.
+Acting as MedBot, provide a very concise, warm spoken response about the ${organName}. 
+Mention one common healthy habit or one potential symptom associated with the ${organName}, and ask a short follow-up question.
+Keep it to exactly 3 sentences maximum for the subtitle reader.`;
+
+    const apiMessages = [
+      ...messages.map((m) => ({ role: m.role, content: m.content })),
+      { role: 'user' as const, content: prompt },
+    ];
+
+    try {
+      const response = await chatWithAssistant(apiMessages);
+      const assistantMessage: Message = { id: Date.now().toString(), role: 'assistant', content: response };
+      setMessages((prev) => [...prev, assistantMessage]);
+      playAISpeech(response);
+    } catch (error) {
+      console.error('Diagnosis failed:', error);
+    } finally {
+      setIsDiagnosing(false);
+    }
+  };
 
   // ─── Draw lifecycle ────────────────────────────────────────────────────
   const handleStartDraw = () => {
@@ -263,7 +359,17 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             setLockedCoords={setLockedCoords}
             isDrawMode={isDrawMode}
             isDrawingActive={isDrawingActive}
+            showTest3D={showTest3D}
           />
+
+          {showTest3D && (
+            <group scale={2}>
+              <TestBrownEyeballs onClick={handleOrganClick} />
+              <TestBrain onClick={handleOrganClick} />
+              <TestLarynx onClick={handleOrganClick} />
+              <TestTongue onClick={handleOrganClick} />
+            </group>
+          )}
 
           {/* Internal organs layer — placed inside a scale={2} group to match FaceModel */}
           <group scale={2}>
@@ -278,8 +384,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
             enablePan={false}
             enableZoom={true}
             enabled={!isDrawingActive}
-            minDistance={4}
-            maxDistance={25}
+            minDistance={2}
+            maxDistance={40}
             makeDefault
           />
           <ContactShadows position={[0, -5, 0]} opacity={0.3} scale={15} blur={2.5} far={4} color="#ffa092" />
@@ -310,6 +416,8 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         toggleCategory={toggleCategory}
         toggleAll={toggleAll}
         allCategories={ALL_CATEGORIES}
+        showTest3D={showTest3D}
+        setShowTest3D={setShowTest3D}
       />
     </div>
   );
