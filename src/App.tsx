@@ -1,6 +1,7 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, type RefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 import { FaceModel } from './components/FaceModel';
 import { ChatPanel } from './components/ChatPanel';
 
@@ -29,6 +30,43 @@ export function CameraMetricsUpdater() {
       el.innerText = `Scale (Dist): ${dist} | Rot: [X:${rotX}° Y:${rotY}° Z:${rotZ}°]`;
     }
   });
+  return null;
+}
+
+function IntroCameraAnimation({
+  controlsRef,
+  onComplete,
+}: {
+  controlsRef: RefObject<any>;
+  onComplete: () => void;
+}) {
+  const { camera } = useThree();
+  const elapsedRef = useRef(0);
+  const startPosition = useRef(new THREE.Vector3(0, 0, 21.61));
+  const endPosition = useRef(new THREE.Vector3(0, 0, 30.95));
+  const startTarget = useRef(new THREE.Vector3(0, 0.08, 0));
+  const endTarget = useRef(new THREE.Vector3(0, 0, 0));
+  const duration = 1.8;
+
+  useFrame((_, delta) => {
+    elapsedRef.current += delta;
+    const progress = Math.min(elapsedRef.current / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    camera.position.lerpVectors(startPosition.current, endPosition.current, eased);
+
+    if (controlsRef.current) {
+      controlsRef.current.target.lerpVectors(startTarget.current, endTarget.current, eased);
+      controlsRef.current.update();
+    } else {
+      camera.lookAt(endTarget.current);
+    }
+
+    if (progress >= 1) {
+      onComplete();
+    }
+  });
+
   return null;
 }
 
@@ -101,6 +139,8 @@ function App() {
   
   // ── Show Test 3D toggle ──
   const [showTest3D, setShowTest3D] = useState(false);
+  const [isIntroAnimating, setIsIntroAnimating] = useState(true);
+  const orbitControlsRef = useRef<any>(null);
 
   // ── Draw mode state ───────────────────────────────────────────────────
   const [isDrawMode, setIsDrawMode] = useState(true);
@@ -275,10 +315,25 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
   const handleFaceUp = useCallback(() => { isStroking.current = false; }, []);
 
+  const printTimestamp = new Date().toLocaleString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   // ─── Render ────────────────────────────────────────────────────────────
   return (
     <div className="app-container">
       <div className="canvas-container">
+        <div className="print-only-report-header">
+          <div className="print-report-meta">{printTimestamp}</div>
+          <div className="print-report-brand">
+            <h1>AGNOS AI</h1>
+            <p>Diagnostic Image Report</p>
+          </div>
+        </div>
 
         {/* Title */}
         <div className="canvas-overlay-ui">
@@ -324,11 +379,17 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
         )}
 
         {/* ── 3D Canvas ────────────────────────────────────────────────── */}
-        <Canvas camera={{ position: [0, 0, 12], fov: 35 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
+        <Canvas camera={{ position: [0, 0, 30.95], fov: 35 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
           <ambientLight intensity={1.2} />
           <spotLight position={[5, 10, 5]} intensity={2.0} penumbra={1} castShadow angle={0.2} />
           <pointLight position={[-5, -5, 5]} intensity={1.5} color="#ffa092" />
           <pointLight position={[0, 0, 8]} intensity={1.0} color="#ffffff" />
+          {isIntroAnimating && (
+            <IntroCameraAnimation
+              controlsRef={orbitControlsRef}
+              onComplete={() => setIsIntroAnimating(false)}
+            />
+          )}
           <CameraMetricsUpdater />
 
           {/* The LeePerrySmith head with decals, scaled ×2 */}
@@ -359,9 +420,10 @@ Keep your entire response to a maximum of 3 to 4 short, spoken sentences.`;
 
           <Environment preset="city" />
           <OrbitControls
+            ref={orbitControlsRef}
             enablePan={false}
             enableZoom={true}
-            enabled={!isDrawingActive}
+            enabled={!isDrawingActive && !isIntroAnimating}
             minDistance={2}
             maxDistance={40}
             makeDefault
